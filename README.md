@@ -15,4 +15,4 @@ The Querier accepts user searches from stdin. Each search is formatted and parse
 
 ## Project Overview
 
-I worked on this project over the month of February when I was enrolled in CS 50: Software Design and Implementation. I wrote each module as well as the underlying index, hashttable, counters, and set data structures.
+I worked on this project over the month of February when I was enrolled in CS 50: Software Design and Implementation. I wrote each module as well as the underlying index, hashtable, counters, and set data structures.
