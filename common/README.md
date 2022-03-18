@@ -2,7 +2,8 @@
 
 Jack McMahon
 
-Febraury 14th 2022
+Febraury 14th, 2022
 
-Assumptions and implementation for this module match the given specifications.
+The common module contains code functions and data structures used across the search engine.
+
 Use and detailed explanation exist pagedir.h, index.h, and word.h
