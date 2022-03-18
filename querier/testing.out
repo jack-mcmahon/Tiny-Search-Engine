@@ -1,0 +1,1735 @@
+bash -v testing.sh
+#!/bin/bash
+#
+# Bash testing script for querier.c
+#
+# Created by Jack McMahon February 21th, 2022
+
+myvalgrind='valgrind --leak-check=full --show-leak-kinds=all'
+
+#********************Incorrect Arguments********************************
+
+#1: Test with incorrectly no arguments
+
+./querier
+Incorrect number of arguments.
+
+#2: Test with incorrectly one argument
+
+./querier output/wikipedia-1
+Incorrect number of arguments.
+
+#3: Test with incorrectly three arguments
+
+./querier output/wikipedia-1 output/wikipedia-1.index 5
+Incorrect number of arguments.
+
+#4:  Test with invalid pageDirectory(non-existant path)
+
+./querier nonexistant-path/tse/output/wikipedia-1 output/wikipedia-1.index
+No .crawler file found in pageDirectory
+pageDirectory could not be validated
+
+#5: Test with invalid pageDirectory(not a crawler directory)
+
+./querier output/indexer output/wikipedia-1.index
+No .crawler file found in pageDirectory
+pageDirectory could not be validated
+
+#6: Test with invalid indexFile(nonexistant path)
+
+./querier output/wikipedia-1 non-existant-path/index-data/test6.index
+Cannot open non-existant-path/index-data/test6.index for reading
+
+#***************Testing Basic Query Inputs****************************
+
+#1: Test with different invalid queries
+
+./querier output/toscrape-1 output/toscrape-1.index < testInputs/input1
+Error: bad character '1' in query
+Error: bad character '-' in query
+Error: bad character '4' in query
+Query: and
+Error: 'and' cannot be first
+Query: or
+Error: 'or' cannot be first
+Query: cat or
+Error: 'or' cannot be last
+Query: and dog
+Error: 'and' cannot be first
+Query: coffee and or tea
+Error: 'and' and 'or' cannot be adjacent
+Query: coffee and and tea
+Error: 'and' and 'and' cannot be adjacent
+Query: coffee or or tea
+Error: 'and' and 'or' cannot be adjacent
+
+#2: Test with different spacing, capitalization, and basic or/and combinations.
+
+./querier output/toscrape-2 output/toscrape-2.index < testInputs/input2
+Query: lots of spaces and capitalization
+Matches (0) documents (ranked):
+No documents match
+-----------------------------------------------
+Query: s i n g l e l e t t e r s g e t n o r e s u l t s
+Matches (0) documents (ranked):
+No documents match
+-----------------------------------------------
+Query: dartmouth
+Matches (0) documents (ranked):
+No documents match
+-----------------------------------------------
+Query: dartmouth college
+Matches (0) documents (ranked):
+No documents match
+-----------------------------------------------
+Query: backpacking or conference
+Matches (3) documents (ranked):
+score     2 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-only-the-himalayas_981/index.html
+score     1 doc   114: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shoe-dog-a-memoir-by-the-creator-of-nike_831/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/olio_984/index.html
+-----------------------------------------------
+Query: conference or backpacking
+Matches (3) documents (ranked):
+score     2 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-only-the-himalayas_981/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/olio_984/index.html
+score     1 doc   114: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shoe-dog-a-memoir-by-the-creator-of-nike_831/index.html
+-----------------------------------------------
+Query: description and more
+Matches (395) documents (ranked):
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-cant-bury-them-all-poems_961/index.html
+score     1 doc     6: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/behind-closed-doors_962/index.html
+score     1 doc     7: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-a-dark-dark-wood_963/index.html
+score     1 doc     8: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/maude-1883-1993she-grew-up-with-the-country_964/index.html
+score     1 doc    10: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sophies-world_966/index.html
+score     1 doc    11: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bear-and-the-piano_967/index.html
+score     1 doc    12: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-elephant-tree_968/index.html
+score     1 doc    13: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-five-love-languages-how-to-express-heartfelt-commitment-to-your-mate_969/index.html
+score     1 doc    14: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-four-agreements-a-practical-guide-to-personal-freedom_970/index.html
+score     1 doc    15: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/wall-and-piece_971/index.html
+score     1 doc    16: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/worlds-elsewhere-journeys-around-shakespeares-globe_972/index.html
+score     1 doc    17: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/aladdin-and-his-wonderful-lamp_973/index.html
+score     1 doc    18: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/americas-cradle-of-quarterbacks-western-pennsylvanias-football-factory-from-johnny-unitas-to-joe-montana_974/index.html
+score     1 doc    19: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/birdsong-a-story-in-pictures_975/index.html
+score     1 doc    20: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/black-dust_976/index.html
+score     1 doc    21: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chase-me-paris-nights-2_977/index.html
+score     1 doc    22: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/foolproof-preserving-a-guide-to-small-batch-jams-jellies-pickles-condiments-and-more-a-foolproof-guide-to-making-small-batch-jams-jellies-pickles-condiments-and-more_978/index.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-music-works_979/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-her-wake_980/index.html
+score     1 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-only-the-himalayas_981/index.html
+score     1 doc    26: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/libertarianism-for-beginners_982/index.html
+score     1 doc    27: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/olio_984/index.html
+score     1 doc    29: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/our-band-could-be-your-life-scenes-from-the-american-indie-underground-1981-1991_985/index.html
+score     1 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rip-it-up-and-start-again_986/index.html
+score     1 doc    31: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/scott-pilgrims-precious-little-life-scott-pilgrim-1_987/index.html
+score     1 doc    32: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/set-me-free_988/index.html
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shakespeares-sonnets_989/index.html
+score     1 doc    34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/starving-hearts-triangular-trade-trilogy-1_990/index.html
+score     1 doc    35: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-black-maria_991/index.html
+score     1 doc    36: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-boys-in-the-boat-nine-americans-and-their-epic-quest-for-gold-at-the-1936-berlin-olympics_992/index.html
+score     1 doc    37: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-coming-woman-a-novel-based-on-the-life-of-the-infamous-feminist-victoria-woodhull_993/index.html
+score     1 doc    38: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-dirty-little-secrets-of-getting-your-dream-job_994/index.html
+score     1 doc    39: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-requiem-red_995/index.html
+score     1 doc    40: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sapiens-a-brief-history-of-humankind_996/index.html
+score     1 doc    41: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sharp-objects_997/index.html
+score     1 doc    42: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soumission_998/index.html
+score     1 doc    43: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tipping-the-velvet_999/index.html
+score     1 doc    44: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-light-in-the-attic_1000/index.html
+score     1 doc    46: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-long-shadow-of-small-ghosts-murder-and-memory-in-an-american-city_848/index.html
+score     1 doc    48: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dark-notes_800/index.html
+score     1 doc    50: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/amid-the-chaos_788/index.html
+score     1 doc    52: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/equal-is-unfair-americas-misguided-fight-against-income-inequality_617/index.html
+score     1 doc    53: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/why-the-right-went-wrong-conservatism-from-goldwater-to-the-tea-party-and-beyond_781/index.html
+score     1 doc    55: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-and-science-of-low-carbohydrate-living_570/index.html
+score     1 doc    56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/10-day-green-smoothie-cleanse-lose-up-to-15-pounds-in-10-days_581/index.html
+score     1 doc    58: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bulletproof-diet-lose-up-to-a-pound-a-day-reclaim-energy-and-focus-upgrade-your-life_931/index.html
+score     1 doc    60: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/suzie-snowflake-one-beautiful-flake-a-self-esteem-story_568/index.html
+score     1 doc    62: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-grownup_546/index.html
+score     1 doc    64: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/silence-in-the-dark-logan-point-4_542/index.html
+score     1 doc    66: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/blue-like-jazz-nonreligious-thoughts-on-christian-spirituality_461/index.html
+score     1 doc    67: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/crazy-love-overwhelmed-by-a-relentless-god_682/index.html
+score     1 doc    68: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unqualified-how-god-uses-broken-people-to-do-big-things_873/index.html
+score     1 doc    70: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-girl-you-left-behind-the-girl-you-left-behind-1_443/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/all-the-light-we-cannot-see_660/index.html
+score     1 doc    73: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-to-stop-worrying-and-start-living_431/index.html
+score     1 doc    74: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-are-a-badass-how-to-stop-doubting-your-greatness-and-start-living-an-awesome-life_508/index.html
+score     1 doc    75: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/overload-how-to-unplug-unwind-and-unleash-yourself-from-the-pressure-of-stress_725/index.html
+score     1 doc    76: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-to-be-miserable-40-strategies-you-already-use_897/index.html
+score     1 doc    77: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/online-marketing-for-busy-authors-a-step-by-step-guide_913/index.html
+score     1 doc    79: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/logan-kade-fallen-crest-high-55_384/index.html
+score     1 doc    81: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-new-earth-awakening-to-your-lifes-purpose_311/index.html
+score     1 doc    82: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unreasonable-hope-finding-faith-in-the-god-who-brings-purpose-to-your-pain_505/index.html
+score     1 doc    83: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/if-i-gave-you-gods-phone-number-searching-for-spirituality-in-america_564/index.html
+score     1 doc    84: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chasing-heaven-what-dying-taught-me-about-living_797/index.html
+score     1 doc    85: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-activists-tao-te-ching-ancient-advice-for-a-modern-revolution_928/index.html
+score     1 doc    87: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/we-are-all-completely-beside-ourselves_301/index.html
+score     1 doc    88: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/someone-like-you-the-harrisons-2_735/index.html
+score     1 doc    89: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/when-we-collided_955/index.html
+score     1 doc    91: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-travelers_285/index.html
+score     1 doc    92: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/far-from-true-promise-falls-trilogy-2_320/index.html
+score     1 doc    93: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bone-hunters-lexy-vaughan-steven-macaulay-2_343/index.html
+score     1 doc    95: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/give-it-back_430/index.html
+score     1 doc    96: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-14th-colony-cotton-malone-11_744/index.html
+score     1 doc    97: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-guilty-will-robie-4_750/index.html
+score     1 doc    98: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-you-1_784/index.html
+score     1 doc   101: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/benjamin-franklin-an-american-life_460/index.html
+score     1 doc   102: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-faith-of-christopher-hitchens-the-restless-soul-of-the-worlds-most-notorious-atheist_495/index.html
+score     1 doc   103: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/setting-the-world-on-fire-the-brief-astonishing-life-of-st-catherine-of-siena_603/index.html
+score     1 doc   104: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/louisa-the-extraordinary-life-of-mrs-adams_818/index.html
+score     1 doc   106: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rework_212/index.html
+score     1 doc   107: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-lean-startup-how-todays-entrepreneurs-use-continuous-innovation-to-create-radically-successful-businesses_260/index.html
+score     1 doc   108: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rich-dad-poor-dad_483/index.html
+score     1 doc   109: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-e-myth-revisited-why-most-small-businesses-dont-work-and-what-to-do-about-it_545/index.html
+score     1 doc   110: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/born-for-this-how-to-find-the-work-you-were-meant-to-do_588/index.html
+score     1 doc   111: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-of-startup-fundraising_606/index.html
+score     1 doc   112: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/quench-your-own-thirst-business-lessons-learned-over-a-beer-or-two_629/index.html
+score     1 doc   113: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/made-to-stick-why-some-ideas-survive-and-others-die_715/index.html
+score     1 doc   114: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shoe-dog-a-memoir-by-the-creator-of-nike_831/index.html
+score     1 doc   115: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-10-entrepreneur-live-your-startup-dream-without-quitting-your-day-job_836/index.html
+score     1 doc   116: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-third-wave-an-entrepreneurs-vision-of-the-future_862/index.html
+score     1 doc   118: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/if-i-run-if-i-run-1_174/index.html
+score     1 doc   119: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/counted-with-the-stars-out-from-egypt-1_463/index.html
+score     1 doc   120: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/like-never-before-walker-family-2_476/index.html
+score     1 doc   121: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shadows-of-the-past-logan-point-1_541/index.html
+score     1 doc   122: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/close-to-you_798/index.html
+score     1 doc   123: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/redeeming-love_826/index.html
+score     1 doc   126: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/naturally-lean-125-nourishing-gluten-free-plant-based-recipes-all-under-300-calories_479/index.html
+score     1 doc   127: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/32-yolks_510/index.html
+score     1 doc   128: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-moosewood-cookbook-recipes-from-moosewood-restaurant-ithaca-new-york_574/index.html
+score     1 doc   129: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/cravings-recipes-for-what-you-want-to-eat_589/index.html
+score     1 doc   130: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-la-mode-120-recipes-in-60-pairings-pies-tarts-cakes-crisps-and-more-topped-with-ice-cream-gelato-frozen-custard-and-more_611/index.html
+score     1 doc   131: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/everyday-italian-125-simple-and-delicious-recipes_618/index.html
+score     1 doc   132: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-kitchen-year-136-recipes-that-saved-my-life_646/index.html
+score     1 doc   133: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/barefoot-contessa-at-home-everyday-recipes-youll-make-over-and-over-again_666/index.html
+score     1 doc   134: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/barefoot-contessa-back-to-basics_667/index.html
+score     1 doc   135: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-all-easy-healthy-delicious-weeknight-meals-in-under-30-minutes_706/index.html
+score     1 doc   136: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-help-yourself-cookbook-for-kids-60-easy-plant-based-recipes-kids-can-make-to-stay-healthy-and-save-the-earth_751/index.html
+score     1 doc   137: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/deliciously-ella-every-day-quick-and-easy-recipes-for-gluten-free-snacks-packed-lunches-and-simple-meals_801/index.html
+score     1 doc   138: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-cookies-cups-cookbook-125-sweet-savory-recipes-reminding-you-to-always-eat-dessert-first_841/index.html
+score     1 doc   139: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-love-and-lemons-cookbook-an-apple-to-zucchini-celebration-of-impromptu-cooking_849/index.html
+score     1 doc   140: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-nerdy-nummies-cookbook-sweet-treats-for-the-geek-in-all-of-us_853/index.html
+score     1 doc   141: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/layered-baking-building-and-styling-spectacular-cakes_904/index.html
+score     1 doc   142: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mama-tried-traditional-italian-cooking-for-the-screwed-crude-vegan-and-tattooed_908/index.html
+score     1 doc   143: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-paris-kitchen-recipes-and-stories_910/index.html
+score     1 doc   144: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-pioneer-woman-cooks-dinnertime-comfort-classics-freezer-food-16-minute-meals-and-other-delicious-ways-to-solve-supper_943/index.html
+score     1 doc   146: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/house-of-lost-worlds-dinosaurs-dynasties-and-the-story-of-life-on-earth_170/index.html
+score     1 doc   147: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-guns-of-august_254/index.html
+score     1 doc   148: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/americas-war-for-the-greater-middle-east-a-military-history_361/index.html
+score     1 doc   149: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hiding-place_406/index.html
+score     1 doc   150: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mathews-men-seven-brothers-and-the-war-against-hitlers-u-boats_408/index.html
+score     1 doc   151: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catherine-the-great-portrait-of-a-woman_424/index.html
+score     1 doc   152: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-rise-and-fall-of-the-third-reich-a-history-of-nazi-germany_454/index.html
+score     1 doc   153: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-short-history-of-nearly-everything_457/index.html
+score     1 doc   154: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/most-blessed-of-the-patriarchs-thomas-jefferson-and-the-empire-of-the-imagination_509/index.html
+score     1 doc   155: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/brilliant-beacons-a-history-of-the-american-lighthouse_515/index.html
+score     1 doc   156: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/1491-new-revelations-of-the-americas-before-columbus_650/index.html
+score     1 doc   157: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-distant-mirror-the-calamitous-14th-century_652/index.html
+score     1 doc   158: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/zealot-the-life-and-times-of-jesus-of-nazareth_785/index.html
+score     1 doc   159: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thomas-jefferson-and-the-tripoli-pirates-the-forgotten-war-that-changed-american-history_867/index.html
+score     1 doc   160: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/political-suicide-missteps-peccadilloes-bad-calls-backroom-hijinx-sordid-pasts-rotten-breaks-and-just-plain-dumb-mistakes-in-the-annals-of-american-politics_917/index.html
+score     1 doc   161: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-age-of-genius-the-seventeenth-century-and-the-birth-of-the-modern-mind_929/index.html
+score     1 doc   162: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unbound-how-eight-technologies-made-us-human-transformed-society-and-brought-our-world-to-the-brink_950/index.html
+score     1 doc   164: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/house-of-leaves_169/index.html
+score     1 doc   165: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-girl-with-all-the-gifts_250/index.html
+score     1 doc   166: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-stand_282/index.html
+score     1 doc   168: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/it_330/index.html
+score     1 doc   169: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/misery_332/index.html
+score     1 doc   170: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/needful-things_334/index.html
+score     1 doc   171: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/night-shift-night-shift-1-20_335/index.html
+score     1 doc   172: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dracula-the-un-dead_370/index.html
+score     1 doc   173: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/red-dragon-hannibal-lecter-1_390/index.html
+score     1 doc   174: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/can-you-keep-a-secret-fear-street-relaunch-4_614/index.html
+score     1 doc   175: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/psycho-sanitarium-psycho-15_628/index.html
+score     1 doc   176: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/doctor-sleep-the-shining-2_686/index.html
+score     1 doc   177: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/pet-sematary_726/index.html
+score     1 doc   178: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-loney_756/index.html
+score     1 doc   179: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/follow-you-home_809/index.html
+score     1 doc   180: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/security_925/index.html
+score     1 doc   183: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lamb-the-gospel-according-to-biff-christs-childhood-pal_182/index.html
+score     1 doc   184: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/naked_197/index.html
+score     1 doc   185: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/when-you-are-engulfed-in-flames_303/index.html
+score     1 doc   186: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/toddlers-are-aholes-its-not-your-fault_503/index.html
+score     1 doc   187: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dress-your-family-in-corduroy-and-denim_562/index.html
+score     1 doc   188: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/hyperbole-and-a-half-unfortunate-situations-flawed-coping-mechanisms-mayhem-and-other-things-that-happened_702/index.html
+score     1 doc   189: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-know-what-im-doing-and-other-lies-i-tell-myself-dispatches-from-a-life-under-construction_704/index.html
+score     1 doc   190: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/old-school-diary-of-a-wimpy-kid-10_723/index.html
+score     1 doc   193: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/fifty-shades-freed-fifty-shades-3_156/index.html
+score     1 doc   195: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catastrophic-happiness-finding-joy-in-childhoods-messy-years_138/index.html
+score     1 doc   197: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-heartbreaking-work-of-staggering-genius_115/index.html
+score     1 doc   198: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/life-without-a-recipe_188/index.html
+score     1 doc   199: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lust-wonder_191/index.html
+score     1 doc   200: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/me-talk-pretty-one-day_193/index.html
+score     1 doc   201: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/running-with-scissors_215/index.html
+score     1 doc   202: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/approval-junkie-adventures-in-caring-too-much_363/index.html
+score     1 doc   203: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lab-girl_595/index.html
+score     1 doc   204: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/m-train_598/index.html
+score     1 doc   205: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-argonauts_837/index.html
+score     1 doc   207: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/8-keys-to-mental-health-through-exercise_114/index.html
+score     1 doc   208: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/civilization-and-its-discontents_140/index.html
+score     1 doc   209: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thinking-fast-and-slow_289/index.html
+score     1 doc   210: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/an-unquiet-mind-a-memoir-of-moods-and-madness_422/index.html
+score     1 doc   211: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/it-didnt-start-with-you-how-inherited-family-trauma-shapes-who-we-are-and-how-to-end-the-cycle_593/index.html
+score     1 doc   212: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-golden-condom-and-other-essays-on-love-lost-and-found_637/index.html
+score     1 doc   213: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-lucifer-effect-understanding-how-good-people-turn-evil_758/index.html
+score     1 doc   215: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/ways-of-seeing_94/index.html
+score     1 doc   216: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-book_490/index.html
+score     1 doc   217: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-story-of-art_500/index.html
+score     1 doc   218: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/history-of-beauty_521/index.html
+score     1 doc   219: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-new-drawing-on-the-right-side-of-the-brain_550/index.html
+score     1 doc   220: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/art-and-fear-observations-on-the-perils-and-rewards-of-artmaking_559/index.html
+score     1 doc   221: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/feathers-displays-of-brilliant-plumage_695/index.html
+score     1 doc   223: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/vampire-knight-vol-1-vampire-knight-1_93/index.html
+score     1 doc   225: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/twenty-love-poems-and-a-song-of-despair_91/index.html
+score     1 doc   226: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/booked_365/index.html
+score     1 doc   227: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-crossover_398/index.html
+score     1 doc   228: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-collected-poems-of-wb-yeats-the-collected-works-of-wb-yeats-1_441/index.html
+score     1 doc   229: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/leave-this-song-behind-teen-poetry-at-its-best_474/index.html
+score     1 doc   230: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/howl-and-other-poems_522/index.html
+score     1 doc   232: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/out-of-print-city-lights-spotlight-no-14_536/index.html
+score     1 doc   233: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/quarter-life-poetry-poems-for-the-young-broke-and-hangry_727/index.html
+score     1 doc   235: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/night-sky-with-exit-wounds_822/index.html
+score     1 doc   236: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/poems-that-make-grown-women-cry_824/index.html
+score     1 doc   237: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/untitled-collection-sabbath-poems-2014_953/index.html
+score     1 doc   238: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/slow-states-of-collapse-poems_960/index.html
+score     1 doc   240: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-selfish-gene_81/index.html
+score     1 doc   241: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/seven-brief-lessons-on-physics_219/index.html
+score     1 doc   242: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/surely-youre-joking-mr-feynman-adventures-of-a-curious-character_227/index.html
+score     1 doc   243: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-disappearing-spoon-and-other-true-tales-of-madness-love-and-the-history-of-the-world-from-the-periodic-table-of-the-elements_244/index.html
+score     1 doc   244: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-elegant-universe-superstrings-hidden-dimensions-and-the-quest-for-the-ultimate-theory_245/index.html
+score     1 doc   246: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-grand-design_405/index.html
+score     1 doc   247: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-origin-of-species_499/index.html
+score     1 doc   248: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/diary-of-a-citizen-scientist-chasing-tiger-beetles-and-other-new-ways-of-engaging-the-world_517/index.html
+score     1 doc   249: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-fabric-of-the-cosmos-space-time-and-the-texture-of-reality_572/index.html
+score     1 doc   250: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tipping-point-for-planet-earth-how-close-are-we-to-the-edge_643/index.html
+score     1 doc   251: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sorting-the-beef-from-the-bull-the-science-of-food-fraud-forensics_736/index.html
+score     1 doc   252: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/immunity-how-elie-metchnikoff-changed-the-course-of-modern-medicine_900/index.html
+score     1 doc   253: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-most-perfect-thing-inside-and-outside-a-birds-egg_938/index.html
+score     1 doc   256: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/stars-above-the-lunar-chronicles-45_632/index.html
+score     1 doc   257: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-epidemic-the-program-06_636/index.html
+score     1 doc   258: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/aristotle-and-dante-discover-the-secrets-of-the-universe-aristotle-and-dante-discover-the-secrets-of-the-universe-1_663/index.html
+score     1 doc   259: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catching-jordan-hundred-oaks_673/index.html
+score     1 doc   260: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dont-get-caught_687/index.html
+score     1 doc   261: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-kind-of-crazy_718/index.html
+score     1 doc   262: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-darkest-lie_747/index.html
+score     1 doc   263: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/this-is-where-it-ends_771/index.html
+score     1 doc   264: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/until-friday-night-the-field-party-1_775/index.html
+score     1 doc   265: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/wild-swans_782/index.html
+score     1 doc   266: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/frostbite-vampire-academy-2_810/index.html
+score     1 doc   267: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/library-of-souls-miss-peregrines-peculiar-children-3_816/index.html
+score     1 doc   268: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/nightingale-sing_823/index.html
+score     1 doc   269: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/scarlett-epstein-hates-it-here_828/index.html
+score     1 doc   270: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-fierce-and-subtle-poison_875/index.html
+score     1 doc   271: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/burning_884/index.html
+score     1 doc   272: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/obsidian-lux-1_911/index.html
+score     1 doc   273: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-natural-history-of-us-the-fine-art-of-pretending-2_941/index.html
+score     1 doc   275: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/off-sides-off-1_38/index.html
+score     1 doc   276: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shameless_52/index.html
+score     1 doc   277: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hook-up-game-on-1_68/index.html
+score     1 doc   278: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-matchmakers-playbook-wingmen-inc-1_850/index.html
+score     1 doc   279: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mistake-off-campus-2_851/index.html
+score     1 doc   280: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/without-borders-wanderlove-1_956/index.html
+score     1 doc   283: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/kings-folly-the-kinsman-chronicles-1_473/index.html
+score     1 doc   284: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-shard-of-ice-the-black-symphony-saga-1_558/index.html
+score     1 doc   285: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-star-touched-queen_642/index.html
+score     1 doc   286: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/searching-for-meaning-in-gailana_648/index.html
+score     1 doc   287: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/city-of-glass-the-mortal-instruments-3_678/index.html
+score     1 doc   288: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/demigods-magicians-percy-and-annabeth-meet-the-kanes-percy-jackson-kane-chronicles-crossover-1-3_685/index.html
+score     1 doc   289: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/island-of-dragons-unwanteds-7_705/index.html
+score     1 doc   290: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bane-chronicles-the-bane-chronicles-1-11_746/index.html
+score     1 doc   291: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hidden-oracle-the-trials-of-apollo-1_752/index.html
+score     1 doc   292: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-star-touched-queen_764/index.html
+score     1 doc   293: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/hollow-city-miss-peregrines-peculiar-children-2_813/index.html
+score     1 doc   294: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-glittering-court-the-glittering-court-1_845/index.html
+score     1 doc   295: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/throne-of-glass-throne-of-glass-1_868/index.html
+score     1 doc   296: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-court-of-thorns-and-roses-a-court-of-thorns-and-roses-1_874/index.html
+score     1 doc   297: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/avatar-the-last-airbender-smoke-and-shadow-part-3-smoke-and-shadow-3_881/index.html
+score     1 doc   298: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/crown-of-midnight-throne-of-glass-2_888/index.html
+score     1 doc   299: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/masks-and-shadows_909/index.html
+score     1 doc   302: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unicorn-tracks_951/index.html
+score     1 doc   305: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-midnight-watch-a-novel-of-the-titanic-and-the-californian_640/index.html
+score     1 doc   306: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rook_647/index.html
+score     1 doc   307: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-brush-of-wings-angels-walking-3_651/index.html
+score     1 doc   308: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-peoples-history-of-the-united-states_654/index.html
+score     1 doc   309: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-series-of-catastrophes-and-miracles-a-true-story-of-love-science-and-cancer_655/index.html
+score     1 doc   310: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/angels-walking-angels-walking-1_662/index.html
+score     1 doc   311: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/cell_674/index.html
+score     1 doc   312: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/code-name-verity-code-name-verity-1_680/index.html
+score     1 doc   313: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/more-than-music-chasing-the-dream-1_716/index.html
+score     1 doc   314: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-dovekeepers_748/index.html
+score     1 doc   315: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-immortal-life-of-henrietta-lacks_753/index.html
+score     1 doc   316: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-song-of-achilles_762/index.html
+score     1 doc   317: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-white-queen-the-cousins-war-1_768/index.html
+score     1 doc   318: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/modern-romance_820/index.html
+score     1 doc   319: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shobu-samurai-project-aryoku-3_830/index.html
+score     1 doc   320: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/judo-seven-steps-to-black-belt-an-introductory-guide-for-beginners_903/index.html
+score     1 doc   321: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/on-a-midnight-clear_912/index.html
+score     1 doc   322: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-forger_930/index.html
+score     1 doc   323: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mindfulness-and-acceptance-workbook-for-anxiety-a-guide-to-breaking-free-from-anxiety-phobias-and-worry-using-acceptance-and-commitment-therapy_937/index.html
+score     1 doc   324: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-torch-is-passed-a-harding-family-story_945/index.html
+score     1 doc   326: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/icing-aces-hockey-2_25/index.html
+score     1 doc   327: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/settling-the-score-the-summer-games-1_50/index.html
+score     1 doc   328: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sugar-rush-offensive-line-2_108/index.html
+score     1 doc   329: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/friday-night-lights-a-town-a-team-and-a-dream_158/index.html
+score     1 doc   330: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-book-of-basketball-the-nba-according-to-the-sports-guy_232/index.html
+score     1 doc   332: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/having-the-barbarians-baby-ice-planet-barbarians-75_23/index.html
+score     1 doc   333: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-last-girl-the-dominion-trilogy-1_70/index.html
+score     1 doc   334: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/three-wishes-river-of-time-california-1_89/index.html
+score     1 doc   335: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/do-androids-dream-of-electric-sheep-blade-runner-1_149/index.html
+score     1 doc   336: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dune-dune-1_151/index.html
+score     1 doc   337: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/life-the-universe-and-everything-hitchhikers-guide-to-the-galaxy-3_189/index.html
+score     1 doc   338: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/ready-player-one_209/index.html
+score     1 doc   339: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-restaurant-at-the-end-of-the-universe-hitchhikers-guide-to-the-galaxy-2_275/index.html
+score     1 doc   340: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/foundation-foundation-publication-order-1_375/index.html
+score     1 doc   341: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/arena_587/index.html
+score     1 doc   342: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sleeping-giants-themis-files-1_604/index.html
+score     1 doc   343: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soft-apocalypse_833/index.html
+score     1 doc   344: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-project_856/index.html
+score     1 doc   345: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/william-shakespeares-star-wars-verily-a-new-hope-william-shakespeares-star-wars-4_871/index.html
+score     1 doc   346: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/join_902/index.html
+score     1 doc   350: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-emerald-mystery_842/index.html
+score     1 doc   351: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-girl-on-the-train_844/index.html
+score     1 doc   352: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-kite-runner_847/index.html
+score     1 doc   353: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-psychopath-test-a-journey-through-the-madness-industry_857/index.html
+score     1 doc   354: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-the-secret-1_859/index.html
+score     1 doc   355: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thirteen-reasons-why_866/index.html
+score     1 doc   356: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tracing-numbers-on-a-train_869/index.html
+score     1 doc   357: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-piece-of-sky-a-grain-of-rice-a-memoir-in-four-meditations_878/index.html
+score     1 doc   358: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-world-of-flavor-your-gluten-free-passport_879/index.html
+score     1 doc   359: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/bossypants_883/index.html
+score     1 doc   360: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soul-reader_926/index.html
+score     1 doc   361: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-inefficiency-assassin-time-management-tactics-for-working-smarter-not-longer_935/index.html
+score     1 doc   363: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/forever-rockers-the-rocker-12_19/index.html
+score     1 doc   364: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/old-records-never-die-one-mans-quest-for-his-vinyl-and-his-past_39/index.html
+score     1 doc   366: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/no-one-here-gets-out-alive_336/index.html
+score     1 doc   367: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/orchestra-of-exiles-the-story-of-bronislaw-huberman-the-israel-philharmonic-and-the-one-thousand-jews-he-saved-from-nazi-horrors_337/index.html
+score     1 doc   368: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/this-is-your-brain-on-music-the-science-of-a-human-obsession_414/index.html
+score     1 doc   369: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chronicles-vol-1_462/index.html
+score     1 doc   370: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/kill-em-and-leave-searching-for-james-brown-and-the-american-soul_528/index.html
+score     1 doc   371: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/please-kill-me-the-uncensored-oral-history-of-punk_537/index.html
+score     1 doc   372: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/love-is-a-mix-tape-music-1_711/index.html
+score     1 doc   375: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/so-youve-been-publicly-shamed_832/index.html
+score     1 doc   376: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-artists-way-a-spiritual-path-to-higher-creativity_839/index.html
+score     1 doc   377: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-genius-of-birds_843/index.html
+score     1 doc   378: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-omnivores-dilemma-a-natural-history-of-four-meals_854/index.html
+score     1 doc   379: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-power-of-now-a-guide-to-spiritual-enlightenment_855/index.html
+score     1 doc   380: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/algorithms-to-live-by-the-computer-science-of-human-decisions_880/index.html
+score     1 doc   381: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/call-the-nurse-true-stories-of-a-country-nurse-on-a-scottish-isle_885/index.html
+score     1 doc   382: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/everydata-the-misinformation-hidden-in-the-little-data-you-consume-every-day_891/index.html
+score     1 doc   383: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-the-country-we-love-my-family-divided_901/index.html
+score     1 doc   384: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/reskilling-america-learning-to-labor-in-the-twenty-first-century_922/index.html
+score     1 doc   385: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/spark-joy-an-illustrated-master-class-on-the-art-of-organizing-and-tidying-up_927/index.html
+score     1 doc   386: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-electric-pencil-drawings-from-inside-state-hospital-no-3_933/index.html
+score     1 doc   387: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-gutsy-girl-escapades-for-your-life-of-epic-adventure_934/index.html
+score     1 doc   388: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-life-changing-magic-of-tidying-up-the-japanese-art-of-decluttering-and-organizing_936/index.html
+score     1 doc   389: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/throwing-rocks-at-the-google-bus-how-growth-became-the-enemy-of-prosperity_948/index.html
+score     1 doc   390: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unseen-city-the-majesty-of-pigeons-the-discreet-charm-of-snails-other-wonders-of-the-urban-wilderness_952/index.html
+score     1 doc   391: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/higherselfie-wake-up-your-life-free-your-soul-find-your-tribe_957/index.html
+score     1 doc   392: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/reasons-to-stay-alive_959/index.html
+score     1 doc   394: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/choosing-our-religion-the-spiritual-lives-of-americas-nones_14/index.html
+score     1 doc   395: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bhagavad-gita_60/index.html
+score     1 doc   396: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-history-of-god-the-4000-year-quest-of-judaism-christianity-and-islam_310/index.html
+score     1 doc   397: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-book-of-mormon_571/index.html
+score     1 doc   398: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/god-the-most-unpleasant-character-in-all-fiction_697/index.html
+score     1 doc   399: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-are-what-you-love-the-spiritual-power-of-habit_872/index.html
+score     1 doc   400: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dont-be-a-jerk-and-other-practical-advice-from-dogen-japans-greatest-zen-master_890/index.html
+score     1 doc   403: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-day-the-crayons-came-home-crayons_241/index.html
+score     1 doc   404: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-lonely-ones_261/index.html
+score     1 doc   405: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-thing-about-jellyfish_283/index.html
+score     1 doc   406: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-wild-robot_288/index.html
+score     1 doc   407: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/maybe-something-beautiful-how-art-transformed-a-neighborhood_386/index.html
+score     1 doc   408: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/playing-from-the-heart_481/index.html
+score     1 doc   409: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/raymie-nightingale_482/index.html
+score     1 doc   410: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shrunken-treasures-literary-classics-short-sweet-and-silly_484/index.html
+score     1 doc   411: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-whale_501/index.html
+score     1 doc   412: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/nap-a-roo_567/index.html
+score     1 doc   413: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/luis-paints-the-world_714/index.html
+score     1 doc   414: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/once-was-a-time_724/index.html
+score     1 doc   415: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rain-fish_728/index.html
+score     1 doc   416: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/twenty-yawns_773/index.html
+score     1 doc   417: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/walt-disneys-alice-in-wonderland_777/index.html
+score     1 doc   418: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/little-red_817/index.html
+score     1 doc   419: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-white-cat-and-the-monk-a-retelling-of-the-poem-pangur-ban_865/index.html
+score     1 doc   420: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-of-dreadwillow-carse_944/index.html
+score     1 doc   423: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/eligible-the-austen-project-4_692/index.html
+score     1 doc   424: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-am-pilgrim-pilgrim-1_703/index.html
+score     1 doc   425: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mr-mercedes-bill-hodges-trilogy-1_717/index.html
+score     1 doc   426: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-mrs-brown_719/index.html
+score     1 doc   427: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-name-is-lucy-barton_720/index.html
+score     1 doc   428: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shtum_733/index.html
+score     1 doc   429: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/still-life-with-bread-crumbs_738/index.html
+score     1 doc   430: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/take-me-with-you_741/index.html
+score     1 doc   431: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-first-hostage-jb-collins-2_749/index.html
+score     1 doc   432: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-testament-of-mary_765/index.html
+score     1 doc   433: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-time-keeper_766/index.html
+score     1 doc   434: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/finders-keepers-bill-hodges-trilogy-2_807/index.html
+score     1 doc   435: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-regional-office-is-under-attack_858/index.html
+score     1 doc   436: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-vacationers_863/index.html
+score     1 doc   437: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tuesday-nights-in-1980_870/index.html
+score     1 doc   438: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-murder-that-never-was-forensic-instincts-5_939/index.html
+score     1 doc   439: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thirst_946/index.html
+score     1 doc   440: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/we-love-you-charlie-freeman_954/index.html
+score     1 doc   441: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/private-paris-private-10_958/index.html
+score     1 doc   443: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/bridget-joness-diary-bridget-jones-1_10/index.html
+score     1 doc   444: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-edge-of-reason-bridget-jones-2_63/index.html
+score     1 doc   445: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/ive-got-your-number_173/index.html
+score     1 doc   446: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/something-blue-darcy-rachel-2_223/index.html
+score     1 doc   447: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/something-borrowed-darcy-rachel-1_224/index.html
+score     1 doc   448: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-devil-wears-prada-the-devil-wears-prada-1_243/index.html
+score     1 doc   449: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-nanny-diaries-nanny-1_265/index.html
+score     1 doc   450: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-undomestic-goddess_286/index.html
+score     1 doc   451: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/twenties-girl_292/index.html
+score     1 doc   452: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/can-you-keep-a-secret_315/index.html
+score     1 doc   453: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shopaholic-ties-the-knot-shopaholic-3_340/index.html
+score     1 doc   454: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/some-women_341/index.html
+score     1 doc   455: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/meternity_478/index.html
+score     1 doc   456: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/grey-fifty-shades-4_592/index.html
+score     1 doc   457: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/keep-me-posted_594/index.html
+score     1 doc   458: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/will-you-wont-you-want-me_644/index.html
+score     1 doc   459: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-had-a-nice-time-and-other-lies-how-to-find-love-sht-like-that_814/index.html
+score     1 doc   462: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/changing-the-game-play-by-play-2_317/index.html
+score     1 doc   463: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dark-lover-black-dagger-brotherhood-1_319/index.html
+score     1 doc   464: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-perfect-play-play-by-play-1_352/index.html
+score     1 doc   465: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-girls-guide-to-moving-on-new-beginnings-2_359/index.html
+score     1 doc   466: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sit-stay-love_486/index.html
+-----------------------------------------------
+Query: more and description
+Matches (395) documents (ranked):
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-cant-bury-them-all-poems_961/index.html
+score     1 doc     6: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/behind-closed-doors_962/index.html
+score     1 doc     7: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-a-dark-dark-wood_963/index.html
+score     1 doc     8: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/maude-1883-1993she-grew-up-with-the-country_964/index.html
+score     1 doc    10: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sophies-world_966/index.html
+score     1 doc    11: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bear-and-the-piano_967/index.html
+score     1 doc    12: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-elephant-tree_968/index.html
+score     1 doc    13: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-five-love-languages-how-to-express-heartfelt-commitment-to-your-mate_969/index.html
+score     1 doc    14: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-four-agreements-a-practical-guide-to-personal-freedom_970/index.html
+score     1 doc    15: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/wall-and-piece_971/index.html
+score     1 doc    16: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/worlds-elsewhere-journeys-around-shakespeares-globe_972/index.html
+score     1 doc    17: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/aladdin-and-his-wonderful-lamp_973/index.html
+score     1 doc    18: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/americas-cradle-of-quarterbacks-western-pennsylvanias-football-factory-from-johnny-unitas-to-joe-montana_974/index.html
+score     1 doc    19: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/birdsong-a-story-in-pictures_975/index.html
+score     1 doc    20: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/black-dust_976/index.html
+score     1 doc    21: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chase-me-paris-nights-2_977/index.html
+score     1 doc    22: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/foolproof-preserving-a-guide-to-small-batch-jams-jellies-pickles-condiments-and-more-a-foolproof-guide-to-making-small-batch-jams-jellies-pickles-condiments-and-more_978/index.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-music-works_979/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-her-wake_980/index.html
+score     1 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-only-the-himalayas_981/index.html
+score     1 doc    26: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/libertarianism-for-beginners_982/index.html
+score     1 doc    27: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/olio_984/index.html
+score     1 doc    29: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/our-band-could-be-your-life-scenes-from-the-american-indie-underground-1981-1991_985/index.html
+score     1 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rip-it-up-and-start-again_986/index.html
+score     1 doc    31: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/scott-pilgrims-precious-little-life-scott-pilgrim-1_987/index.html
+score     1 doc    32: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/set-me-free_988/index.html
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shakespeares-sonnets_989/index.html
+score     1 doc    34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/starving-hearts-triangular-trade-trilogy-1_990/index.html
+score     1 doc    35: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-black-maria_991/index.html
+score     1 doc    36: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-boys-in-the-boat-nine-americans-and-their-epic-quest-for-gold-at-the-1936-berlin-olympics_992/index.html
+score     1 doc    37: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-coming-woman-a-novel-based-on-the-life-of-the-infamous-feminist-victoria-woodhull_993/index.html
+score     1 doc    38: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-dirty-little-secrets-of-getting-your-dream-job_994/index.html
+score     1 doc    39: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-requiem-red_995/index.html
+score     1 doc    40: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sapiens-a-brief-history-of-humankind_996/index.html
+score     1 doc    41: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sharp-objects_997/index.html
+score     1 doc    42: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soumission_998/index.html
+score     1 doc    43: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tipping-the-velvet_999/index.html
+score     1 doc    44: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-light-in-the-attic_1000/index.html
+score     1 doc    46: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-long-shadow-of-small-ghosts-murder-and-memory-in-an-american-city_848/index.html
+score     1 doc    48: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dark-notes_800/index.html
+score     1 doc    50: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/amid-the-chaos_788/index.html
+score     1 doc    52: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/equal-is-unfair-americas-misguided-fight-against-income-inequality_617/index.html
+score     1 doc    53: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/why-the-right-went-wrong-conservatism-from-goldwater-to-the-tea-party-and-beyond_781/index.html
+score     1 doc    55: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-and-science-of-low-carbohydrate-living_570/index.html
+score     1 doc    56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/10-day-green-smoothie-cleanse-lose-up-to-15-pounds-in-10-days_581/index.html
+score     1 doc    58: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bulletproof-diet-lose-up-to-a-pound-a-day-reclaim-energy-and-focus-upgrade-your-life_931/index.html
+score     1 doc    60: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/suzie-snowflake-one-beautiful-flake-a-self-esteem-story_568/index.html
+score     1 doc    62: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-grownup_546/index.html
+score     1 doc    64: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/silence-in-the-dark-logan-point-4_542/index.html
+score     1 doc    66: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/blue-like-jazz-nonreligious-thoughts-on-christian-spirituality_461/index.html
+score     1 doc    67: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/crazy-love-overwhelmed-by-a-relentless-god_682/index.html
+score     1 doc    68: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unqualified-how-god-uses-broken-people-to-do-big-things_873/index.html
+score     1 doc    70: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-girl-you-left-behind-the-girl-you-left-behind-1_443/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/all-the-light-we-cannot-see_660/index.html
+score     1 doc    73: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-to-stop-worrying-and-start-living_431/index.html
+score     1 doc    74: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-are-a-badass-how-to-stop-doubting-your-greatness-and-start-living-an-awesome-life_508/index.html
+score     1 doc    75: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/overload-how-to-unplug-unwind-and-unleash-yourself-from-the-pressure-of-stress_725/index.html
+score     1 doc    76: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-to-be-miserable-40-strategies-you-already-use_897/index.html
+score     1 doc    77: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/online-marketing-for-busy-authors-a-step-by-step-guide_913/index.html
+score     1 doc    79: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/logan-kade-fallen-crest-high-55_384/index.html
+score     1 doc    81: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-new-earth-awakening-to-your-lifes-purpose_311/index.html
+score     1 doc    82: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unreasonable-hope-finding-faith-in-the-god-who-brings-purpose-to-your-pain_505/index.html
+score     1 doc    83: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/if-i-gave-you-gods-phone-number-searching-for-spirituality-in-america_564/index.html
+score     1 doc    84: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chasing-heaven-what-dying-taught-me-about-living_797/index.html
+score     1 doc    85: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-activists-tao-te-ching-ancient-advice-for-a-modern-revolution_928/index.html
+score     1 doc    87: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/we-are-all-completely-beside-ourselves_301/index.html
+score     1 doc    88: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/someone-like-you-the-harrisons-2_735/index.html
+score     1 doc    89: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/when-we-collided_955/index.html
+score     1 doc    91: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-travelers_285/index.html
+score     1 doc    92: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/far-from-true-promise-falls-trilogy-2_320/index.html
+score     1 doc    93: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bone-hunters-lexy-vaughan-steven-macaulay-2_343/index.html
+score     1 doc    95: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/give-it-back_430/index.html
+score     1 doc    96: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-14th-colony-cotton-malone-11_744/index.html
+score     1 doc    97: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-guilty-will-robie-4_750/index.html
+score     1 doc    98: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-you-1_784/index.html
+score     1 doc   101: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/benjamin-franklin-an-american-life_460/index.html
+score     1 doc   102: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-faith-of-christopher-hitchens-the-restless-soul-of-the-worlds-most-notorious-atheist_495/index.html
+score     1 doc   103: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/setting-the-world-on-fire-the-brief-astonishing-life-of-st-catherine-of-siena_603/index.html
+score     1 doc   104: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/louisa-the-extraordinary-life-of-mrs-adams_818/index.html
+score     1 doc   106: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rework_212/index.html
+score     1 doc   107: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-lean-startup-how-todays-entrepreneurs-use-continuous-innovation-to-create-radically-successful-businesses_260/index.html
+score     1 doc   108: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rich-dad-poor-dad_483/index.html
+score     1 doc   109: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-e-myth-revisited-why-most-small-businesses-dont-work-and-what-to-do-about-it_545/index.html
+score     1 doc   110: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/born-for-this-how-to-find-the-work-you-were-meant-to-do_588/index.html
+score     1 doc   111: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-of-startup-fundraising_606/index.html
+score     1 doc   112: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/quench-your-own-thirst-business-lessons-learned-over-a-beer-or-two_629/index.html
+score     1 doc   113: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/made-to-stick-why-some-ideas-survive-and-others-die_715/index.html
+score     1 doc   114: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shoe-dog-a-memoir-by-the-creator-of-nike_831/index.html
+score     1 doc   115: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-10-entrepreneur-live-your-startup-dream-without-quitting-your-day-job_836/index.html
+score     1 doc   116: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-third-wave-an-entrepreneurs-vision-of-the-future_862/index.html
+score     1 doc   118: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/if-i-run-if-i-run-1_174/index.html
+score     1 doc   119: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/counted-with-the-stars-out-from-egypt-1_463/index.html
+score     1 doc   120: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/like-never-before-walker-family-2_476/index.html
+score     1 doc   121: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shadows-of-the-past-logan-point-1_541/index.html
+score     1 doc   122: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/close-to-you_798/index.html
+score     1 doc   123: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/redeeming-love_826/index.html
+score     1 doc   126: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/naturally-lean-125-nourishing-gluten-free-plant-based-recipes-all-under-300-calories_479/index.html
+score     1 doc   127: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/32-yolks_510/index.html
+score     1 doc   128: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-moosewood-cookbook-recipes-from-moosewood-restaurant-ithaca-new-york_574/index.html
+score     1 doc   129: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/cravings-recipes-for-what-you-want-to-eat_589/index.html
+score     1 doc   130: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-la-mode-120-recipes-in-60-pairings-pies-tarts-cakes-crisps-and-more-topped-with-ice-cream-gelato-frozen-custard-and-more_611/index.html
+score     1 doc   131: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/everyday-italian-125-simple-and-delicious-recipes_618/index.html
+score     1 doc   132: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-kitchen-year-136-recipes-that-saved-my-life_646/index.html
+score     1 doc   133: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/barefoot-contessa-at-home-everyday-recipes-youll-make-over-and-over-again_666/index.html
+score     1 doc   134: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/barefoot-contessa-back-to-basics_667/index.html
+score     1 doc   135: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-all-easy-healthy-delicious-weeknight-meals-in-under-30-minutes_706/index.html
+score     1 doc   136: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-help-yourself-cookbook-for-kids-60-easy-plant-based-recipes-kids-can-make-to-stay-healthy-and-save-the-earth_751/index.html
+score     1 doc   137: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/deliciously-ella-every-day-quick-and-easy-recipes-for-gluten-free-snacks-packed-lunches-and-simple-meals_801/index.html
+score     1 doc   138: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-cookies-cups-cookbook-125-sweet-savory-recipes-reminding-you-to-always-eat-dessert-first_841/index.html
+score     1 doc   139: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-love-and-lemons-cookbook-an-apple-to-zucchini-celebration-of-impromptu-cooking_849/index.html
+score     1 doc   140: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-nerdy-nummies-cookbook-sweet-treats-for-the-geek-in-all-of-us_853/index.html
+score     1 doc   141: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/layered-baking-building-and-styling-spectacular-cakes_904/index.html
+score     1 doc   142: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mama-tried-traditional-italian-cooking-for-the-screwed-crude-vegan-and-tattooed_908/index.html
+score     1 doc   143: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-paris-kitchen-recipes-and-stories_910/index.html
+score     1 doc   144: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-pioneer-woman-cooks-dinnertime-comfort-classics-freezer-food-16-minute-meals-and-other-delicious-ways-to-solve-supper_943/index.html
+score     1 doc   146: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/house-of-lost-worlds-dinosaurs-dynasties-and-the-story-of-life-on-earth_170/index.html
+score     1 doc   147: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-guns-of-august_254/index.html
+score     1 doc   148: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/americas-war-for-the-greater-middle-east-a-military-history_361/index.html
+score     1 doc   149: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hiding-place_406/index.html
+score     1 doc   150: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mathews-men-seven-brothers-and-the-war-against-hitlers-u-boats_408/index.html
+score     1 doc   151: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catherine-the-great-portrait-of-a-woman_424/index.html
+score     1 doc   152: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-rise-and-fall-of-the-third-reich-a-history-of-nazi-germany_454/index.html
+score     1 doc   153: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-short-history-of-nearly-everything_457/index.html
+score     1 doc   154: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/most-blessed-of-the-patriarchs-thomas-jefferson-and-the-empire-of-the-imagination_509/index.html
+score     1 doc   155: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/brilliant-beacons-a-history-of-the-american-lighthouse_515/index.html
+score     1 doc   156: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/1491-new-revelations-of-the-americas-before-columbus_650/index.html
+score     1 doc   157: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-distant-mirror-the-calamitous-14th-century_652/index.html
+score     1 doc   158: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/zealot-the-life-and-times-of-jesus-of-nazareth_785/index.html
+score     1 doc   159: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thomas-jefferson-and-the-tripoli-pirates-the-forgotten-war-that-changed-american-history_867/index.html
+score     1 doc   160: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/political-suicide-missteps-peccadilloes-bad-calls-backroom-hijinx-sordid-pasts-rotten-breaks-and-just-plain-dumb-mistakes-in-the-annals-of-american-politics_917/index.html
+score     1 doc   161: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-age-of-genius-the-seventeenth-century-and-the-birth-of-the-modern-mind_929/index.html
+score     1 doc   162: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unbound-how-eight-technologies-made-us-human-transformed-society-and-brought-our-world-to-the-brink_950/index.html
+score     1 doc   164: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/house-of-leaves_169/index.html
+score     1 doc   165: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-girl-with-all-the-gifts_250/index.html
+score     1 doc   166: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-stand_282/index.html
+score     1 doc   168: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/it_330/index.html
+score     1 doc   169: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/misery_332/index.html
+score     1 doc   170: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/needful-things_334/index.html
+score     1 doc   171: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/night-shift-night-shift-1-20_335/index.html
+score     1 doc   172: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dracula-the-un-dead_370/index.html
+score     1 doc   173: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/red-dragon-hannibal-lecter-1_390/index.html
+score     1 doc   174: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/can-you-keep-a-secret-fear-street-relaunch-4_614/index.html
+score     1 doc   175: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/psycho-sanitarium-psycho-15_628/index.html
+score     1 doc   176: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/doctor-sleep-the-shining-2_686/index.html
+score     1 doc   177: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/pet-sematary_726/index.html
+score     1 doc   178: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-loney_756/index.html
+score     1 doc   179: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/follow-you-home_809/index.html
+score     1 doc   180: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/security_925/index.html
+score     1 doc   183: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lamb-the-gospel-according-to-biff-christs-childhood-pal_182/index.html
+score     1 doc   184: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/naked_197/index.html
+score     1 doc   185: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/when-you-are-engulfed-in-flames_303/index.html
+score     1 doc   186: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/toddlers-are-aholes-its-not-your-fault_503/index.html
+score     1 doc   187: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dress-your-family-in-corduroy-and-denim_562/index.html
+score     1 doc   188: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/hyperbole-and-a-half-unfortunate-situations-flawed-coping-mechanisms-mayhem-and-other-things-that-happened_702/index.html
+score     1 doc   189: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-know-what-im-doing-and-other-lies-i-tell-myself-dispatches-from-a-life-under-construction_704/index.html
+score     1 doc   190: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/old-school-diary-of-a-wimpy-kid-10_723/index.html
+score     1 doc   193: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/fifty-shades-freed-fifty-shades-3_156/index.html
+score     1 doc   195: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catastrophic-happiness-finding-joy-in-childhoods-messy-years_138/index.html
+score     1 doc   197: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-heartbreaking-work-of-staggering-genius_115/index.html
+score     1 doc   198: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/life-without-a-recipe_188/index.html
+score     1 doc   199: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lust-wonder_191/index.html
+score     1 doc   200: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/me-talk-pretty-one-day_193/index.html
+score     1 doc   201: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/running-with-scissors_215/index.html
+score     1 doc   202: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/approval-junkie-adventures-in-caring-too-much_363/index.html
+score     1 doc   203: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/lab-girl_595/index.html
+score     1 doc   204: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/m-train_598/index.html
+score     1 doc   205: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-argonauts_837/index.html
+score     1 doc   207: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/8-keys-to-mental-health-through-exercise_114/index.html
+score     1 doc   208: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/civilization-and-its-discontents_140/index.html
+score     1 doc   209: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thinking-fast-and-slow_289/index.html
+score     1 doc   210: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/an-unquiet-mind-a-memoir-of-moods-and-madness_422/index.html
+score     1 doc   211: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/it-didnt-start-with-you-how-inherited-family-trauma-shapes-who-we-are-and-how-to-end-the-cycle_593/index.html
+score     1 doc   212: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-golden-condom-and-other-essays-on-love-lost-and-found_637/index.html
+score     1 doc   213: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-lucifer-effect-understanding-how-good-people-turn-evil_758/index.html
+score     1 doc   215: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/ways-of-seeing_94/index.html
+score     1 doc   216: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-book_490/index.html
+score     1 doc   217: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-story-of-art_500/index.html
+score     1 doc   218: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/history-of-beauty_521/index.html
+score     1 doc   219: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-new-drawing-on-the-right-side-of-the-brain_550/index.html
+score     1 doc   220: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/art-and-fear-observations-on-the-perils-and-rewards-of-artmaking_559/index.html
+score     1 doc   221: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/feathers-displays-of-brilliant-plumage_695/index.html
+score     1 doc   223: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/vampire-knight-vol-1-vampire-knight-1_93/index.html
+score     1 doc   225: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/twenty-love-poems-and-a-song-of-despair_91/index.html
+score     1 doc   226: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/booked_365/index.html
+score     1 doc   227: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-crossover_398/index.html
+score     1 doc   228: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-collected-poems-of-wb-yeats-the-collected-works-of-wb-yeats-1_441/index.html
+score     1 doc   229: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/leave-this-song-behind-teen-poetry-at-its-best_474/index.html
+score     1 doc   230: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/howl-and-other-poems_522/index.html
+score     1 doc   232: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/out-of-print-city-lights-spotlight-no-14_536/index.html
+score     1 doc   233: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/quarter-life-poetry-poems-for-the-young-broke-and-hangry_727/index.html
+score     1 doc   235: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/night-sky-with-exit-wounds_822/index.html
+score     1 doc   236: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/poems-that-make-grown-women-cry_824/index.html
+score     1 doc   237: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/untitled-collection-sabbath-poems-2014_953/index.html
+score     1 doc   238: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/slow-states-of-collapse-poems_960/index.html
+score     1 doc   240: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-selfish-gene_81/index.html
+score     1 doc   241: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/seven-brief-lessons-on-physics_219/index.html
+score     1 doc   242: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/surely-youre-joking-mr-feynman-adventures-of-a-curious-character_227/index.html
+score     1 doc   243: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-disappearing-spoon-and-other-true-tales-of-madness-love-and-the-history-of-the-world-from-the-periodic-table-of-the-elements_244/index.html
+score     1 doc   244: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-elegant-universe-superstrings-hidden-dimensions-and-the-quest-for-the-ultimate-theory_245/index.html
+score     1 doc   246: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-grand-design_405/index.html
+score     1 doc   247: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-origin-of-species_499/index.html
+score     1 doc   248: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/diary-of-a-citizen-scientist-chasing-tiger-beetles-and-other-new-ways-of-engaging-the-world_517/index.html
+score     1 doc   249: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-fabric-of-the-cosmos-space-time-and-the-texture-of-reality_572/index.html
+score     1 doc   250: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tipping-point-for-planet-earth-how-close-are-we-to-the-edge_643/index.html
+score     1 doc   251: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sorting-the-beef-from-the-bull-the-science-of-food-fraud-forensics_736/index.html
+score     1 doc   252: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/immunity-how-elie-metchnikoff-changed-the-course-of-modern-medicine_900/index.html
+score     1 doc   253: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-most-perfect-thing-inside-and-outside-a-birds-egg_938/index.html
+score     1 doc   256: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/stars-above-the-lunar-chronicles-45_632/index.html
+score     1 doc   257: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-epidemic-the-program-06_636/index.html
+score     1 doc   258: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/aristotle-and-dante-discover-the-secrets-of-the-universe-aristotle-and-dante-discover-the-secrets-of-the-universe-1_663/index.html
+score     1 doc   259: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catching-jordan-hundred-oaks_673/index.html
+score     1 doc   260: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dont-get-caught_687/index.html
+score     1 doc   261: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-kind-of-crazy_718/index.html
+score     1 doc   262: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-darkest-lie_747/index.html
+score     1 doc   263: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/this-is-where-it-ends_771/index.html
+score     1 doc   264: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/until-friday-night-the-field-party-1_775/index.html
+score     1 doc   265: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/wild-swans_782/index.html
+score     1 doc   266: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/frostbite-vampire-academy-2_810/index.html
+score     1 doc   267: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/library-of-souls-miss-peregrines-peculiar-children-3_816/index.html
+score     1 doc   268: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/nightingale-sing_823/index.html
+score     1 doc   269: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/scarlett-epstein-hates-it-here_828/index.html
+score     1 doc   270: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-fierce-and-subtle-poison_875/index.html
+score     1 doc   271: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/burning_884/index.html
+score     1 doc   272: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/obsidian-lux-1_911/index.html
+score     1 doc   273: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-natural-history-of-us-the-fine-art-of-pretending-2_941/index.html
+score     1 doc   275: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/off-sides-off-1_38/index.html
+score     1 doc   276: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shameless_52/index.html
+score     1 doc   277: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hook-up-game-on-1_68/index.html
+score     1 doc   278: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-matchmakers-playbook-wingmen-inc-1_850/index.html
+score     1 doc   279: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mistake-off-campus-2_851/index.html
+score     1 doc   280: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/without-borders-wanderlove-1_956/index.html
+score     1 doc   283: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/kings-folly-the-kinsman-chronicles-1_473/index.html
+score     1 doc   284: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-shard-of-ice-the-black-symphony-saga-1_558/index.html
+score     1 doc   285: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-star-touched-queen_642/index.html
+score     1 doc   286: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/searching-for-meaning-in-gailana_648/index.html
+score     1 doc   287: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/city-of-glass-the-mortal-instruments-3_678/index.html
+score     1 doc   288: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/demigods-magicians-percy-and-annabeth-meet-the-kanes-percy-jackson-kane-chronicles-crossover-1-3_685/index.html
+score     1 doc   289: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/island-of-dragons-unwanteds-7_705/index.html
+score     1 doc   290: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bane-chronicles-the-bane-chronicles-1-11_746/index.html
+score     1 doc   291: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hidden-oracle-the-trials-of-apollo-1_752/index.html
+score     1 doc   292: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-star-touched-queen_764/index.html
+score     1 doc   293: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/hollow-city-miss-peregrines-peculiar-children-2_813/index.html
+score     1 doc   294: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-glittering-court-the-glittering-court-1_845/index.html
+score     1 doc   295: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/throne-of-glass-throne-of-glass-1_868/index.html
+score     1 doc   296: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-court-of-thorns-and-roses-a-court-of-thorns-and-roses-1_874/index.html
+score     1 doc   297: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/avatar-the-last-airbender-smoke-and-shadow-part-3-smoke-and-shadow-3_881/index.html
+score     1 doc   298: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/crown-of-midnight-throne-of-glass-2_888/index.html
+score     1 doc   299: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/masks-and-shadows_909/index.html
+score     1 doc   302: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unicorn-tracks_951/index.html
+score     1 doc   305: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-midnight-watch-a-novel-of-the-titanic-and-the-californian_640/index.html
+score     1 doc   306: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rook_647/index.html
+score     1 doc   307: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-brush-of-wings-angels-walking-3_651/index.html
+score     1 doc   308: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-peoples-history-of-the-united-states_654/index.html
+score     1 doc   309: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-series-of-catastrophes-and-miracles-a-true-story-of-love-science-and-cancer_655/index.html
+score     1 doc   310: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/angels-walking-angels-walking-1_662/index.html
+score     1 doc   311: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/cell_674/index.html
+score     1 doc   312: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/code-name-verity-code-name-verity-1_680/index.html
+score     1 doc   313: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/more-than-music-chasing-the-dream-1_716/index.html
+score     1 doc   314: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-dovekeepers_748/index.html
+score     1 doc   315: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-immortal-life-of-henrietta-lacks_753/index.html
+score     1 doc   316: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-song-of-achilles_762/index.html
+score     1 doc   317: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-white-queen-the-cousins-war-1_768/index.html
+score     1 doc   318: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/modern-romance_820/index.html
+score     1 doc   319: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shobu-samurai-project-aryoku-3_830/index.html
+score     1 doc   320: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/judo-seven-steps-to-black-belt-an-introductory-guide-for-beginners_903/index.html
+score     1 doc   321: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/on-a-midnight-clear_912/index.html
+score     1 doc   322: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-art-forger_930/index.html
+score     1 doc   323: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-mindfulness-and-acceptance-workbook-for-anxiety-a-guide-to-breaking-free-from-anxiety-phobias-and-worry-using-acceptance-and-commitment-therapy_937/index.html
+score     1 doc   324: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-torch-is-passed-a-harding-family-story_945/index.html
+score     1 doc   326: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/icing-aces-hockey-2_25/index.html
+score     1 doc   327: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/settling-the-score-the-summer-games-1_50/index.html
+score     1 doc   328: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sugar-rush-offensive-line-2_108/index.html
+score     1 doc   329: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/friday-night-lights-a-town-a-team-and-a-dream_158/index.html
+score     1 doc   330: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-book-of-basketball-the-nba-according-to-the-sports-guy_232/index.html
+score     1 doc   332: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/having-the-barbarians-baby-ice-planet-barbarians-75_23/index.html
+score     1 doc   333: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-last-girl-the-dominion-trilogy-1_70/index.html
+score     1 doc   334: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/three-wishes-river-of-time-california-1_89/index.html
+score     1 doc   335: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/do-androids-dream-of-electric-sheep-blade-runner-1_149/index.html
+score     1 doc   336: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dune-dune-1_151/index.html
+score     1 doc   337: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/life-the-universe-and-everything-hitchhikers-guide-to-the-galaxy-3_189/index.html
+score     1 doc   338: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/ready-player-one_209/index.html
+score     1 doc   339: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-restaurant-at-the-end-of-the-universe-hitchhikers-guide-to-the-galaxy-2_275/index.html
+score     1 doc   340: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/foundation-foundation-publication-order-1_375/index.html
+score     1 doc   341: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/arena_587/index.html
+score     1 doc   342: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sleeping-giants-themis-files-1_604/index.html
+score     1 doc   343: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soft-apocalypse_833/index.html
+score     1 doc   344: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-project_856/index.html
+score     1 doc   345: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/william-shakespeares-star-wars-verily-a-new-hope-william-shakespeares-star-wars-4_871/index.html
+score     1 doc   346: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/join_902/index.html
+score     1 doc   350: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-emerald-mystery_842/index.html
+score     1 doc   351: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-girl-on-the-train_844/index.html
+score     1 doc   352: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-kite-runner_847/index.html
+score     1 doc   353: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-psychopath-test-a-journey-through-the-madness-industry_857/index.html
+score     1 doc   354: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-the-secret-1_859/index.html
+score     1 doc   355: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thirteen-reasons-why_866/index.html
+score     1 doc   356: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tracing-numbers-on-a-train_869/index.html
+score     1 doc   357: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-piece-of-sky-a-grain-of-rice-a-memoir-in-four-meditations_878/index.html
+score     1 doc   358: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-world-of-flavor-your-gluten-free-passport_879/index.html
+score     1 doc   359: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/bossypants_883/index.html
+score     1 doc   360: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soul-reader_926/index.html
+score     1 doc   361: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-inefficiency-assassin-time-management-tactics-for-working-smarter-not-longer_935/index.html
+score     1 doc   363: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/forever-rockers-the-rocker-12_19/index.html
+score     1 doc   364: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/old-records-never-die-one-mans-quest-for-his-vinyl-and-his-past_39/index.html
+score     1 doc   366: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/no-one-here-gets-out-alive_336/index.html
+score     1 doc   367: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/orchestra-of-exiles-the-story-of-bronislaw-huberman-the-israel-philharmonic-and-the-one-thousand-jews-he-saved-from-nazi-horrors_337/index.html
+score     1 doc   368: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/this-is-your-brain-on-music-the-science-of-a-human-obsession_414/index.html
+score     1 doc   369: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chronicles-vol-1_462/index.html
+score     1 doc   370: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/kill-em-and-leave-searching-for-james-brown-and-the-american-soul_528/index.html
+score     1 doc   371: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/please-kill-me-the-uncensored-oral-history-of-punk_537/index.html
+score     1 doc   372: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/love-is-a-mix-tape-music-1_711/index.html
+score     1 doc   375: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/so-youve-been-publicly-shamed_832/index.html
+score     1 doc   376: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-artists-way-a-spiritual-path-to-higher-creativity_839/index.html
+score     1 doc   377: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-genius-of-birds_843/index.html
+score     1 doc   378: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-omnivores-dilemma-a-natural-history-of-four-meals_854/index.html
+score     1 doc   379: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-power-of-now-a-guide-to-spiritual-enlightenment_855/index.html
+score     1 doc   380: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/algorithms-to-live-by-the-computer-science-of-human-decisions_880/index.html
+score     1 doc   381: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/call-the-nurse-true-stories-of-a-country-nurse-on-a-scottish-isle_885/index.html
+score     1 doc   382: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/everydata-the-misinformation-hidden-in-the-little-data-you-consume-every-day_891/index.html
+score     1 doc   383: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-the-country-we-love-my-family-divided_901/index.html
+score     1 doc   384: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/reskilling-america-learning-to-labor-in-the-twenty-first-century_922/index.html
+score     1 doc   385: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/spark-joy-an-illustrated-master-class-on-the-art-of-organizing-and-tidying-up_927/index.html
+score     1 doc   386: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-electric-pencil-drawings-from-inside-state-hospital-no-3_933/index.html
+score     1 doc   387: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-gutsy-girl-escapades-for-your-life-of-epic-adventure_934/index.html
+score     1 doc   388: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-life-changing-magic-of-tidying-up-the-japanese-art-of-decluttering-and-organizing_936/index.html
+score     1 doc   389: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/throwing-rocks-at-the-google-bus-how-growth-became-the-enemy-of-prosperity_948/index.html
+score     1 doc   390: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unseen-city-the-majesty-of-pigeons-the-discreet-charm-of-snails-other-wonders-of-the-urban-wilderness_952/index.html
+score     1 doc   391: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/higherselfie-wake-up-your-life-free-your-soul-find-your-tribe_957/index.html
+score     1 doc   392: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/reasons-to-stay-alive_959/index.html
+score     1 doc   394: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/choosing-our-religion-the-spiritual-lives-of-americas-nones_14/index.html
+score     1 doc   395: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-bhagavad-gita_60/index.html
+score     1 doc   396: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-history-of-god-the-4000-year-quest-of-judaism-christianity-and-islam_310/index.html
+score     1 doc   397: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-book-of-mormon_571/index.html
+score     1 doc   398: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/god-the-most-unpleasant-character-in-all-fiction_697/index.html
+score     1 doc   399: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/you-are-what-you-love-the-spiritual-power-of-habit_872/index.html
+score     1 doc   400: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dont-be-a-jerk-and-other-practical-advice-from-dogen-japans-greatest-zen-master_890/index.html
+score     1 doc   403: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-day-the-crayons-came-home-crayons_241/index.html
+score     1 doc   404: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-lonely-ones_261/index.html
+score     1 doc   405: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-thing-about-jellyfish_283/index.html
+score     1 doc   406: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-wild-robot_288/index.html
+score     1 doc   407: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/maybe-something-beautiful-how-art-transformed-a-neighborhood_386/index.html
+score     1 doc   408: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/playing-from-the-heart_481/index.html
+score     1 doc   409: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/raymie-nightingale_482/index.html
+score     1 doc   410: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shrunken-treasures-literary-classics-short-sweet-and-silly_484/index.html
+score     1 doc   411: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-whale_501/index.html
+score     1 doc   412: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/nap-a-roo_567/index.html
+score     1 doc   413: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/luis-paints-the-world_714/index.html
+score     1 doc   414: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/once-was-a-time_724/index.html
+score     1 doc   415: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rain-fish_728/index.html
+score     1 doc   416: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/twenty-yawns_773/index.html
+score     1 doc   417: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/walt-disneys-alice-in-wonderland_777/index.html
+score     1 doc   418: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/little-red_817/index.html
+score     1 doc   419: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-white-cat-and-the-monk-a-retelling-of-the-poem-pangur-ban_865/index.html
+score     1 doc   420: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-of-dreadwillow-carse_944/index.html
+score     1 doc   423: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/eligible-the-austen-project-4_692/index.html
+score     1 doc   424: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-am-pilgrim-pilgrim-1_703/index.html
+score     1 doc   425: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mr-mercedes-bill-hodges-trilogy-1_717/index.html
+score     1 doc   426: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-mrs-brown_719/index.html
+score     1 doc   427: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-name-is-lucy-barton_720/index.html
+score     1 doc   428: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shtum_733/index.html
+score     1 doc   429: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/still-life-with-bread-crumbs_738/index.html
+score     1 doc   430: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/take-me-with-you_741/index.html
+score     1 doc   431: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-first-hostage-jb-collins-2_749/index.html
+score     1 doc   432: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-testament-of-mary_765/index.html
+score     1 doc   433: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-time-keeper_766/index.html
+score     1 doc   434: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/finders-keepers-bill-hodges-trilogy-2_807/index.html
+score     1 doc   435: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-regional-office-is-under-attack_858/index.html
+score     1 doc   436: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-vacationers_863/index.html
+score     1 doc   437: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/tuesday-nights-in-1980_870/index.html
+score     1 doc   438: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-murder-that-never-was-forensic-instincts-5_939/index.html
+score     1 doc   439: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thirst_946/index.html
+score     1 doc   440: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/we-love-you-charlie-freeman_954/index.html
+score     1 doc   441: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/private-paris-private-10_958/index.html
+score     1 doc   443: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/bridget-joness-diary-bridget-jones-1_10/index.html
+score     1 doc   444: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-edge-of-reason-bridget-jones-2_63/index.html
+score     1 doc   445: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/ive-got-your-number_173/index.html
+score     1 doc   446: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/something-blue-darcy-rachel-2_223/index.html
+score     1 doc   447: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/something-borrowed-darcy-rachel-1_224/index.html
+score     1 doc   448: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-devil-wears-prada-the-devil-wears-prada-1_243/index.html
+score     1 doc   449: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-nanny-diaries-nanny-1_265/index.html
+score     1 doc   450: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-undomestic-goddess_286/index.html
+score     1 doc   451: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/twenties-girl_292/index.html
+score     1 doc   452: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/can-you-keep-a-secret_315/index.html
+score     1 doc   453: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shopaholic-ties-the-knot-shopaholic-3_340/index.html
+score     1 doc   454: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/some-women_341/index.html
+score     1 doc   455: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/meternity_478/index.html
+score     1 doc   456: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/grey-fifty-shades-4_592/index.html
+score     1 doc   457: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/keep-me-posted_594/index.html
+score     1 doc   458: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/will-you-wont-you-want-me_644/index.html
+score     1 doc   459: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-had-a-nice-time-and-other-lies-how-to-find-love-sht-like-that_814/index.html
+score     1 doc   462: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/changing-the-game-play-by-play-2_317/index.html
+score     1 doc   463: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dark-lover-black-dagger-brotherhood-1_319/index.html
+score     1 doc   464: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-perfect-play-play-by-play-1_352/index.html
+score     1 doc   465: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-girls-guide-to-moving-on-new-beginnings-2_359/index.html
+score     1 doc   466: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sit-stay-love_486/index.html
+-----------------------------------------------
+
+#***************Testing Valgrind****************************
+
+#1: Test with valgrind 1
+
+$myvalgrind echo superscript or hop or fame |  ./querier output/wikipedia-2 output/wikipedia-2.index
+==40484== Memcheck, a memory error detector
+==40484== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40484== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40484== Command: echo superscript or hop or fame
+==40484== 
+==40484== 
+==40484== HEAP SUMMARY:
+==40484==     in use at exit: 0 bytes in 0 blocks
+==40484==   total heap usage: 3 allocs, 3 frees, 4,140 bytes allocated
+==40484== 
+==40484== All heap blocks were freed -- no leaks are possible
+==40484== 
+==40484== For counts of detected and suppressed errors, rerun with: -v
+==40484== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Query: superscript or hop or fame
+Matches (123) documents (ranked):
+score    30 doc   266: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Syracuse_Orange.html
+score    11 doc   514: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hopkins_Center_for_the_Arts.html
+score    11 doc   708: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Traceroute.html
+score    10 doc   393: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/San_Diego_Padres.html
+score     6 doc   212: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College.html
+score     6 doc  1475: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Routing.html
+score     6 doc   270: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Navy_Midshipmen.html
+score     6 doc   326: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Earl_Thomson.html
+score     6 doc   343: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Reggie_Williams_(linebacker).html
+score     6 doc   347: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Brad_Ausmus.html
+score     6 doc   363: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fred_Rogers.html
+score     6 doc   895: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linus_Torvalds.html
+score     4 doc   175: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hopscotch_hashing.html
+score     4 doc   367: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Chris_Meledandri.html
+score     4 doc   423: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dr-2.html
+score     4 doc   907: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Session_Initiation_Protocol.html
+score     4 doc   279: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Columbia_Lions.html
+score     4 doc   342: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Nick_Lowery.html
+score     4 doc   344: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Jay_Fiedler.html
+score     4 doc   380: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Grant_Tinker.html
+score     4 doc   550: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Passion_for_Snow.html
+score     4 doc   551: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Passion_for_Skiing.html
+score     3 doc  1196: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Multiplication.html
+score     3 doc   255: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Swarthmore_College.html
+score     3 doc   282: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_Forensic_Union.html
+score     3 doc   458: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Mascot.html
+score     3 doc   491: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College_student_groups.html
+score     3 doc   252: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/The_College_of_William_%26_Mary.html
+score     3 doc   293: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/The_Tabard_(fraternity).html
+score     3 doc   301: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_Big_Green_football.html
+score     3 doc   371: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Saturday_Night_Live.html
+score     3 doc   385: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hallmark_Cards.html
+score     3 doc   591: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College_Greek_organizations.html
+score     3 doc  1608: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Peter_J.html
+score     2 doc   186: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Sequence.html
+score     2 doc   835: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Small_caps.html
+score     2 doc   849: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Trademark.html
+score     2 doc   139: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Bloom_filter.html
+score     2 doc   253: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Williams_College.html
+score     2 doc   487: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/The_Dartmouth_Aires.html
+score     2 doc   585: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Long_Island.html
+score     2 doc   608: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/United_States.html
+score     2 doc   912: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Internet_Protocol_Suite.html
+score     2 doc   939: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/TCP/IP.html
+score     2 doc  1115: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Englewood_Cliffs%2c_NJ.html
+score     2 doc   114: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Artificial_intelligence.html
+score     2 doc   247: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Rensselaer_Engineers.html
+score     2 doc   275: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Penn_Quakers.html
+score     2 doc   323: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Gerry_Ashworth.html
+score     2 doc   356: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Friends.html
+score     2 doc   359: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Andrew_Shue.html
+score     2 doc   389: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/IBM.html
+score     2 doc   428: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Budd_Schulberg.html
+score     2 doc   459: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Philadelphia_Mint.html
+score     2 doc   524: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dwight_D.html
+score     2 doc   574: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Cricket.html
+score     2 doc  1014: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Apple%2c_Inc.html
+score     2 doc  1127: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/George_Necula.html
+score     2 doc  1573: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Claude_Shannon.html
+score     2 doc  1621: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Advertising.html
+score     2 doc  1651: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Herman_Hollerith.html
+score     1 doc  1184: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Operator_precedence.html
+score     1 doc  1187: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Order_of_operations.html
+score     1 doc  1213: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Unicode.html
+score     1 doc  1335: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/ALGOL_68.html
+score     1 doc   128: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score     1 doc   364: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Despicable_Me.html
+score     1 doc   365: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Horton_Hears_a_Who%21_(film).html
+score     1 doc   471: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Bonfire.html
+score     1 doc   475: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/E-mail.html
+score     1 doc   489: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Appalachian_Trail.html
+score     1 doc   512: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Manhattan.html
+score     1 doc   553: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Jim_Yong_Kim.html
+score     1 doc   910: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/SMTP.html
+score     1 doc   995: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Internet.html
+score     1 doc  1238: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Endianness.html
+score     1 doc  1467: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_animation.html
+score     1 doc  1568: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Network_coding.html
+score     1 doc  1620: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Animation.html
+score     1 doc    41: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Introduction_to_Algorithms.html
+score     1 doc   117: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Herbert_A.html
+score     1 doc   245: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/St-2.html
+score     1 doc   250: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Clarkson_Golden_Knights.html
+score     1 doc   259: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Davidson_College.html
+score     1 doc   260: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/College_of_the_Holy_Cross.html
+score     1 doc   265: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Wisconsin_Badgers.html
+score     1 doc   267: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Rutgers_Scarlet_Knights.html
+score     1 doc   274: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Yale_Bulldogs.html
+score     1 doc   276: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Princeton_Tigers.html
+score     1 doc   277: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Harvard_Crimson.html
+score     1 doc   304: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/William_Jewell_College.html
+score     1 doc   310: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/NNDB.html
+score     1 doc   312: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/U.S-2.html
+score     1 doc   313: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/F.html
+score     1 doc   314: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Ann_Sheridan.html
+score     1 doc   329: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dick_Durrance.html
+score     1 doc   331: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Gillian_Apps.html
+score     1 doc   346: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Gold_Glove.html
+score     1 doc   352: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/The_West_Wing.html
+score     1 doc   355: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/24_(TV_series).html
+score     1 doc   374: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Michael_Phillips_(producer).html
+score     1 doc   386: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Donald_J._Hall%2c_Sr.html
+score     1 doc   394: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Sandy_Alderson.html
+score     1 doc   417: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Joseph_Tracy.html
+score     1 doc   421: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Jonathan_Clarkson_Gibbs.html
+score     1 doc   549: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/U.S.html
+score     1 doc   556: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Booz_Allen_Hamilton.html
+score     1 doc   564: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/College_admissions_in_the_United_States.html
+score     1 doc   897: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Richard_Stallman.html
+score     1 doc   935: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Bill_Clinton.html
+score     1 doc   989: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Mouse_(computing).html
+score     1 doc  1018: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Novell.html
+score     1 doc  1140: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Valgrind.html
+score     1 doc  1367: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/STEM_fields.html
+score     1 doc  1386: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Invention.html
+score     1 doc  1389: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Animatronics.html
+score     1 doc  1430: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Automation.html
+score     1 doc  1513: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Samuel_Morse.html
+score     1 doc  1546: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Robotics.html
+score     1 doc  1590: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Alan_Turing.html
+score     1 doc  1595: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Philosophy.html
+score     1 doc  1624: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Entertainment.html
+score     1 doc  1657: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Charles_Babbage.html
+-----------------------------------------------
+
+#1: Test with valgrind 2
+
+$myvalgrind echo poetry or this and that translation  |   ./querier output/wikipedia-2 output/wikipedia-2.index
+==40528== Memcheck, a memory error detector
+==40528== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==40528== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==40528== Command: echo poetry or this and that translation
+==40528== 
+==40528== 
+==40528== HEAP SUMMARY:
+==40528==     in use at exit: 0 bytes in 0 blocks
+==40528==   total heap usage: 3 allocs, 3 frees, 4,140 bytes allocated
+==40528== 
+==40528== All heap blocks were freed -- no leaks are possible
+==40528== 
+==40528== For counts of detected and suppressed errors, rerun with: -v
+==40528== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+Query: poetry or this and that translation
+Matches (189) documents (ranked):
+score    40 doc   438: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Robert_Frost.html
+score    38 doc   110: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Machine_translation.html
+score    21 doc   439: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Richard_Eberhart.html
+score    14 doc   440: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Pulitzer_Prize.html
+score    13 doc   183: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Translation_lookaside_buffer.html
+score    13 doc   412: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Joseph_Smith.html
+score    12 doc   184: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/CPU_cache.html
+score    11 doc   107: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linguistics.html
+score    11 doc  1299: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Internationalization_and_localization.html
+score    10 doc  1515: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Leibniz.html
+score    10 doc  1537: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Natural_language_processing.html
+score    10 doc  1662: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Gottfried_Leibniz.html
+score     9 doc  1594: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computational_linguistics.html
+score     8 doc   832: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Anglo-Saxon_language.html
+score     6 doc   648: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Virtual_memory.html
+score     6 doc  1123: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Source-to-source_compiler.html
+score     5 doc  1624: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Entertainment.html
+score     5 doc   114: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Artificial_intelligence.html
+score     5 doc   605: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_green.html
+score     5 doc   858: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Compiler.html
+score     4 doc   429: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Louise_Erdrich.html
+score     4 doc  1653: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Ada_Lovelace.html
+score     4 doc   200: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Cache_(computing).html
+score     4 doc   302: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Wikisource.html
+score     4 doc   411: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/LDS_Church.html
+score     4 doc  1198: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Addition.html
+score     4 doc  1293: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Scope_(programming).html
+score     4 doc  1311: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Lexical_scope.html
+score     4 doc  1490: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Number_theory.html
+score     3 doc   161: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Perl.html
+score     3 doc   221: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Saint_Anselm_College.html
+score     3 doc   282: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_Forensic_Union.html
+score     3 doc   424: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Norman_Maclean.html
+score     3 doc   491: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dartmouth_College_student_groups.html
+score     3 doc   608: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/United_States.html
+score     3 doc     2: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linked_list.html
+score     3 doc    76: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Tail-sharing.html
+score     3 doc   149: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C%2b%2b11.html
+score     3 doc  1009: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Porting.html
+score     3 doc  1241: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Character_encoding.html
+score     3 doc  1270: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_preprocessor.html
+score     3 doc  1479: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Software_testing.html
+score     3 doc  1601: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Greek_language.html
+score     3 doc  1644: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Bletchley_Park.html
+score     3 doc  1666: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Algorithm.html
+score     2 doc   112: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/UNESCO.html
+score     2 doc   243: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Union_Dutchmen.html
+score     2 doc   253: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Williams_College.html
+score     2 doc   255: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Swarthmore_College.html
+score     2 doc   260: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/College_of_the_Holy_Cross.html
+score     2 doc   263: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Amherst_College.html
+score     2 doc  1108: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/W._W.html
+score     2 doc  1286: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Curly_braces.html
+score     2 doc  1595: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Philosophy.html
+score     2 doc  1657: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Charles_Babbage.html
+score     2 doc    57: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Programming_language.html
+score     2 doc   389: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/IBM.html
+score     2 doc   567: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/John_Ordronaux_(doctor).html
+score     2 doc   607: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Geographic_coordinate_system.html
+score     2 doc   635: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/DOS.html
+score     2 doc   862: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Kludge.html
+score     2 doc   889: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linux_distributions.html
+score     2 doc   918: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Newline.html
+score     2 doc   929: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Plan_9_from_Bell_Labs.html
+score     2 doc  1054: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Non-English-based_programming_languages.html
+score     2 doc  1131: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Abstract_syntax_tree.html
+score     2 doc  1160: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_string.html
+score     2 doc  1192: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Boolean_algebra.html
+score     2 doc  1226: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Formal_grammar.html
+score     2 doc  1237: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Inline_function.html
+score     2 doc  1284: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/For_loop.html
+score     2 doc  1312: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/ALGOL.html
+score     2 doc  1485: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Interpreter_(computing).html
+score     2 doc  1535: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Digital_logic.html
+score     2 doc  1561: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Programming_languages.html
+score     2 doc  1587: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Algebra.html
+score     2 doc  1659: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Mechanical_calculator.html
+score     1 doc   227: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/The_College_of_Saint_Mary_Magdalen.html
+score     1 doc   246: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/St.html
+score     1 doc   259: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Davidson_College.html
+score     1 doc   403: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Vassar_College.html
+score     1 doc   423: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dr-2.html
+score     1 doc   469: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Synecdoche.html
+score     1 doc   522: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/New_England.html
+score     1 doc   547: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Liberal_arts.html
+score     1 doc   564: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/College_admissions_in_the_United_States.html
+score     1 doc   833: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Latin_declension.html
+score     1 doc   975: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/HP-UX.html
+score     1 doc  1667: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Human.html
+score     1 doc     8: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Trie.html
+score     1 doc    56: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Functional_programming_language.html
+score     1 doc    59: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dynamic_memory_allocation.html
+score     1 doc    60: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Serialization.html
+score     1 doc    81: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/AVL_tree.html
+score     1 doc    83: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Josephus_problem.html
+score     1 doc    92: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Fragmentation_(computer).html
+score     1 doc   108: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Victor_Yngve.html
+score     1 doc   128: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hash_table.html
+score     1 doc   196: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Prime_number.html
+score     1 doc   309: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Encyclop%c3%a6dia_Britannica.html
+score     1 doc   413: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hyrum_Smith.html
+score     1 doc   511: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Metropolitan_Opera.html
+score     1 doc   540: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/London_School_of_Economics.html
+score     1 doc   576: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Christianization.html
+score     1 doc   587: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Mohegan.html
+score     1 doc   603: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Ivy_League.html
+score     1 doc   628: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/RISC_OS.html
+score     1 doc   637: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/AmigaOS.html
+score     1 doc   651: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Paging.html
+score     1 doc   652: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Memory_protection.html
+score     1 doc   656: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Memory_management.html
+score     1 doc   673: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Exokernel.html
+score     1 doc   774: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Finger_protocol.html
+score     1 doc   877: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/NetBSD.html
+score     1 doc   883: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Linux_Mint.html
+score     1 doc   884: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Ubuntu_(operating_system).html
+score     1 doc   885: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/OpenSUSE.html
+score     1 doc   886: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/SUSE_Linux.html
+score     1 doc   902: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Free_software_movement.html
+score     1 doc   916: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/ASCII.html
+score     1 doc   926: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/CP/M.html
+score     1 doc   933: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Burroughs_large_systems.html
+score     1 doc   960: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Libc.html
+score     1 doc   966: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/POSIX.html
+score     1 doc   980: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/High-level_programming_language.html
+score     1 doc   984: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Semaphore_(programming).html
+score     1 doc   989: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Mouse_(computing).html
+score     1 doc  1006: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/File_system.html
+score     1 doc  1013: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/OS_X.html
+score     1 doc  1055: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Visual_Basic_.html
+score     1 doc  1063: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/BSD_libc.html
+score     1 doc  1067: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Hybris_(software).html
+score     1 doc  1085: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C%2b%2bBuilder.html
+score     1 doc  1101: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Eclipse_(software).html
+score     1 doc  1111: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Backus-Naur_form.html
+score     1 doc  1121: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Generic_programming.html
+score     1 doc  1136: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Interpreted_language.html
+score     1 doc  1140: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Valgrind.html
+score     1 doc  1142: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/MISRA_C.html
+score     1 doc  1148: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Memory_leak.html
+score     1 doc  1156: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Static_memory_allocation.html
+score     1 doc  1157: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Malloc.html
+score     1 doc  1163: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Buffer_overflow.html
+score     1 doc  1165: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Wild_pointer.html
+score     1 doc  1166: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Dangling_pointer.html
+score     1 doc  1180: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Preprocessing.html
+score     1 doc  1251: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_standard_library.html
+score     1 doc  1255: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Lowest_common_denominator_(computers).html
+score     1 doc  1265: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Static_(keyword).html
+score     1 doc  1269: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Source_code.html
+score     1 doc  1291: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Functional_programming.html
+score     1 doc  1303: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C_syntax.html
+score     1 doc  1304: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Syntax_(programming_languages).html
+score     1 doc  1334: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/PL/I.html
+score     1 doc  1335: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/ALGOL_68.html
+score     1 doc  1350: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Programming_language_implementation.html
+score     1 doc  1355: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/C11_(C_standard_revision).html
+score     1 doc  1362: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Programming_paradigm.html
+score     1 doc  1365: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_science.html
+score     1 doc  1385: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Timeline_of_historic_inventions.html
+score     1 doc  1441: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Multimedia_learning.html
+score     1 doc  1452: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Construction.html
+score     1 doc  1453: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Tissue_engineering.html
+score     1 doc  1455: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Medical_research.html
+score     1 doc  1456: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Genetic_engineering.html
+score     1 doc  1463: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Symbolic_computation.html
+score     1 doc  1467: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_animation.html
+score     1 doc  1470: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Automated_reasoning.html
+score     1 doc  1480: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Requirements_analysis.html
+score     1 doc  1486: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Parsing.html
+score     1 doc  1512: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Turing_machine.html
+score     1 doc  1536: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Medical_Image_Computing.html
+score     1 doc  1543: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_vision.html
+score     1 doc  1549: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Semiotics.html
+score     1 doc  1553: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Program_semantics.html
+score     1 doc  1560: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Formal_methods.html
+score     1 doc  1569: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Error_detection_and_correction.html
+score     1 doc  1570: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Data_compression.html
+score     1 doc  1576: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Quantum_computer.html
+score     1 doc  1580: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/P_%3d_NP_problem.html
+score     1 doc  1591: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Kurt_G%c3%b6del.html
+score     1 doc  1592: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Logic.html
+score     1 doc  1596: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Information_systems.html
+score     1 doc  1603: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Peter_Naur.html
+score     1 doc  1637: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Cryptanalysis_of_the_Enigma.html
+score     1 doc  1645: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Enigma_machine.html
+score     1 doc  1661: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Stepped_Reckoner.html
+score     1 doc  1663: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Blaise_Pascal.html
+score     1 doc  1671: http://cs50tse.cs.dartmouth.edu/tse/wikipedia/Computer_programming.html
+-----------------------------------------------
+
+#*************** Regression Testing with myfuzzquery ****************************
+
+#1: Test with myfuzzquery 1
+
+./myfuzzquery output/toscrape-1.index 10 0 | ./querier output/toscrape-1 output/toscrape-1.index  | tee regressiontesting/first-trial-toscrape-1
+./myfuzzquery: generating 10 queries from 2326 words
+Query: years and wax
+Matches (1) documents (ranked):
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+-----------------------------------------------
+Query: ends or aficionados recognized or classic objects
+Matches (2) documents (ranked):
+score     1 doc    19: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sharp-objects_997/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/mystery_3/index.html
+-----------------------------------------------
+Query: recognize available or monkey
+Matches (2) documents (ranked):
+score     1 doc    13: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-black-maria_991/index.html
+score     1 doc     3: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-only-the-himalayas_981/index.html
+-----------------------------------------------
+Query: answers window patient or lunarian or mississippians or nine
+Matches (4) documents (ranked):
+score     4 doc    14: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-boys-in-the-boat-nine-americans-and-their-epic-quest-for-gold-at-the-1936-berlin-olympics_992/index.html
+score     3 doc    17: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-requiem-red_995/index.html
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+score     1 doc     6: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/olio_984/index.html
+-----------------------------------------------
+Query: comiques or university watson evaluating and rush or childrens
+Matches (55) documents (ranked):
+score     4 doc    63: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/childrens_11/index.html
+score     1 doc    20: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soumission_998/index.html
+score     1 doc     1: http://cs50tse.cs.dartmouth.edu/tse/toscrape/
+score     1 doc     2: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/page-2.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/crime_51/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/erotica_50/index.html
+score     1 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/cultural_49/index.html
+score     1 doc    26: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/politics_48/index.html
+score     1 doc    27: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/health_47/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/novels_46/index.html
+score     1 doc    29: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/short-stories_45/index.html
+score     1 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/suspense_44/index.html
+score     1 doc    31: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian_43/index.html
+score     1 doc    32: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical_42/index.html
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/self-help_41/index.html
+score     1 doc    34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/academic_40/index.html
+score     1 doc    35: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/spirituality_39/index.html
+score     1 doc    36: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/contemporary_38/index.html
+score     1 doc    37: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/thriller_37/index.html
+score     1 doc    38: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/biography_36/index.html
+score     1 doc    39: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/business_35/index.html
+score     1 doc    40: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian-fiction_34/index.html
+score     1 doc    41: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/food-and-drink_33/index.html
+score     1 doc    42: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/history_32/index.html
+score     1 doc    43: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/horror_31/index.html
+score     1 doc    44: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/humor_30/index.html
+score     1 doc    45: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/adult-fiction_29/index.html
+score     1 doc    46: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/parenting_28/index.html
+score     1 doc    47: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/autobiography_27/index.html
+score     1 doc    48: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/psychology_26/index.html
+score     1 doc    49: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/art_25/index.html
+score     1 doc    50: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/paranormal_24/index.html
+score     1 doc    51: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/poetry_23/index.html
+score     1 doc    52: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science_22/index.html
+score     1 doc    53: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/young-adult_21/index.html
+score     1 doc    54: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/new-adult_20/index.html
+score     1 doc    55: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fantasy_19/index.html
+score     1 doc    56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/add-a-comment_18/index.html
+score     1 doc    57: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sports-and-games_17/index.html
+score     1 doc    58: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science-fiction_16/index.html
+score     1 doc    59: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/default_15/index.html
+score     1 doc    60: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/music_14/index.html
+score     1 doc    61: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/nonfiction_13/index.html
+score     1 doc    62: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/religion_12/index.html
+score     1 doc    64: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fiction_10/index.html
+score     1 doc    65: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/womens-fiction_9/index.html
+score     1 doc    66: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/romance_8/index.html
+score     1 doc    67: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/philosophy_7/index.html
+score     1 doc    68: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/classics_6/index.html
+score     1 doc    69: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sequential-art_5/index.html
+score     1 doc    70: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical-fiction_4/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/mystery_3/index.html
+score     1 doc    72: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/travel_2/index.html
+score     1 doc    73: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books_1/index.html
+score     1 doc    74: http://cs50tse.cs.dartmouth.edu/tse/toscrape/index.html
+-----------------------------------------------
+Query: totally when diary bedfored or association
+Matches (1) documents (ranked):
+score     1 doc    15: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-coming-woman-a-novel-based-on-the-life-of-the-infamous-feminist-victoria-woodhull_993/index.html
+-----------------------------------------------
+Query: worrying
+Matches (1) documents (ranked):
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/self-help_41/index.html
+-----------------------------------------------
+Query: young member or horror
+Matches (54) documents (ranked):
+score     4 doc    43: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/horror_31/index.html
+score     1 doc     1: http://cs50tse.cs.dartmouth.edu/tse/toscrape/
+score     1 doc     2: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/page-2.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/crime_51/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/erotica_50/index.html
+score     1 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/cultural_49/index.html
+score     1 doc    26: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/politics_48/index.html
+score     1 doc    27: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/health_47/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/novels_46/index.html
+score     1 doc    29: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/short-stories_45/index.html
+score     1 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/suspense_44/index.html
+score     1 doc    31: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian_43/index.html
+score     1 doc    32: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical_42/index.html
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/self-help_41/index.html
+score     1 doc    34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/academic_40/index.html
+score     1 doc    35: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/spirituality_39/index.html
+score     1 doc    36: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/contemporary_38/index.html
+score     1 doc    37: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/thriller_37/index.html
+score     1 doc    38: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/biography_36/index.html
+score     1 doc    39: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/business_35/index.html
+score     1 doc    40: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian-fiction_34/index.html
+score     1 doc    41: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/food-and-drink_33/index.html
+score     1 doc    42: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/history_32/index.html
+score     1 doc    44: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/humor_30/index.html
+score     1 doc    45: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/adult-fiction_29/index.html
+score     1 doc    46: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/parenting_28/index.html
+score     1 doc    47: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/autobiography_27/index.html
+score     1 doc    48: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/psychology_26/index.html
+score     1 doc    49: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/art_25/index.html
+score     1 doc    50: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/paranormal_24/index.html
+score     1 doc    51: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/poetry_23/index.html
+score     1 doc    52: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science_22/index.html
+score     1 doc    53: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/young-adult_21/index.html
+score     1 doc    54: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/new-adult_20/index.html
+score     1 doc    55: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fantasy_19/index.html
+score     1 doc    56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/add-a-comment_18/index.html
+score     1 doc    57: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sports-and-games_17/index.html
+score     1 doc    58: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science-fiction_16/index.html
+score     1 doc    59: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/default_15/index.html
+score     1 doc    60: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/music_14/index.html
+score     1 doc    61: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/nonfiction_13/index.html
+score     1 doc    62: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/religion_12/index.html
+score     1 doc    63: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/childrens_11/index.html
+score     1 doc    64: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fiction_10/index.html
+score     1 doc    65: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/womens-fiction_9/index.html
+score     1 doc    66: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/romance_8/index.html
+score     1 doc    67: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/philosophy_7/index.html
+score     1 doc    68: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/classics_6/index.html
+score     1 doc    69: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sequential-art_5/index.html
+score     1 doc    70: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical-fiction_4/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/mystery_3/index.html
+score     1 doc    72: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/travel_2/index.html
+score     1 doc    73: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books_1/index.html
+score     1 doc    74: http://cs50tse.cs.dartmouth.edu/tse/toscrape/index.html
+-----------------------------------------------
+Query: lyrics
+Matches (1) documents (ranked):
+score     2 doc    17: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-requiem-red_995/index.html
+-----------------------------------------------
+Query: flying or knot or freed and cruising and blessed
+Matches (2) documents (ranked):
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+score     1 doc    65: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/womens-fiction_9/index.html
+-----------------------------------------------
+
+#2: Test with myfuzzquery 2
+./myfuzzquery output/toscrape-2.index 10 0 | ./querier output/toscrape-2 output/toscrape-2.index  | tee regressiontesting/first-trial-toscrape-2
+./myfuzzquery: generating 10 queries from 12137 words
+Query: fortitude and hannibal
+Matches (0) documents (ranked):
+No documents match
+-----------------------------------------------
+Query: comedy or effectively nation or legendary hangs
+Matches (1) documents (ranked):
+score     1 doc    84: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chasing-heaven-what-dying-taught-me-about-living_797/index.html
+-----------------------------------------------
+Query: archrival station or cbddb
+Matches (1) documents (ranked):
+score     1 doc   234: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/salt_731/index.html
+-----------------------------------------------
+Query: answers statesman raging or stoker or mississippians or threatens
+Matches (3) documents (ranked):
+score     9 doc   172: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dracula-the-un-dead_370/index.html
+score     1 doc   425: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mr-mercedes-bill-hodges-trilogy-1_717/index.html
+score     1 doc   438: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-murder-that-never-was-forensic-instincts-5_939/index.html
+-----------------------------------------------
+Query: cue or brad complemented renderings and stayed or versification
+Matches (2) documents (ranked):
+score     2 doc   410: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shrunken-treasures-literary-classics-short-sweet-and-silly_484/index.html
+score     1 doc   459: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-had-a-nice-time-and-other-lies-how-to-find-love-sht-like-that_814/index.html
+-----------------------------------------------
+Query: authentic church loyalties cracking or joy
+Matches (30) documents (ranked):
+score     6 doc   385: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/spark-joy-an-illustrated-master-class-on-the-art-of-organizing-and-tidying-up_927/index.html
+score     4 doc   195: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catastrophic-happiness-finding-joy-in-childhoods-messy-years_138/index.html
+score     2 doc    14: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-four-agreements-a-practical-guide-to-personal-freedom_970/index.html
+score     2 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rip-it-up-and-start-again_986/index.html
+score     2 doc    81: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-new-earth-awakening-to-your-lifes-purpose_311/index.html
+score     2 doc   110: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/born-for-this-how-to-find-the-work-you-were-meant-to-do_588/index.html
+score     2 doc   387: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-gutsy-girl-escapades-for-your-life-of-epic-adventure_934/index.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-music-works_979/index.html
+score     1 doc   132: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-kitchen-year-136-recipes-that-saved-my-life_646/index.html
+score     1 doc   187: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dress-your-family-in-corduroy-and-denim_562/index.html
+score     1 doc   188: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/hyperbole-and-a-half-unfortunate-situations-flawed-coping-mechanisms-mayhem-and-other-things-that-happened_702/index.html
+score     1 doc   189: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-know-what-im-doing-and-other-lies-i-tell-myself-dispatches-from-a-life-under-construction_704/index.html
+score     1 doc   190: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/old-school-diary-of-a-wimpy-kid-10_723/index.html
+score     1 doc   191: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-long-haul-diary-of-a-wimpy-kid-9_757/index.html
+score     1 doc   193: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/fifty-shades-freed-fifty-shades-3_156/index.html
+score     1 doc   194: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/parenting_28/index.html
+score     1 doc   241: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/seven-brief-lessons-on-physics_219/index.html
+score     1 doc   304: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/add-a-comment_18/page-2.html
+score     1 doc   353: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-psychopath-test-a-journey-through-the-madness-industry_857/index.html
+score     1 doc   354: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-the-secret-1_859/index.html
+score     1 doc   357: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-piece-of-sky-a-grain-of-rice-a-memoir-in-four-meditations_878/index.html
+score     1 doc   373: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/nonfiction_13/index.html
+score     1 doc   379: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-power-of-now-a-guide-to-spiritual-enlightenment_855/index.html
+score     1 doc   380: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/algorithms-to-live-by-the-computer-science-of-human-decisions_880/index.html
+score     1 doc   381: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/call-the-nurse-true-stories-of-a-country-nurse-on-a-scottish-isle_885/index.html
+score     1 doc   382: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/everydata-the-misinformation-hidden-in-the-little-data-you-consume-every-day_891/index.html
+score     1 doc   383: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-the-country-we-love-my-family-divided_901/index.html
+score     1 doc   384: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/reskilling-america-learning-to-labor-in-the-twenty-first-century_922/index.html
+score     1 doc   388: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-life-changing-magic-of-tidying-up-the-japanese-art-of-decluttering-and-organizing_936/index.html
+score     1 doc   420: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-of-dreadwillow-carse_944/index.html
+-----------------------------------------------
+Query: committed
+Matches (5) documents (ranked):
+score     2 doc   355: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thirteen-reasons-why_866/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-her-wake_980/index.html
+score     1 doc   277: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hook-up-game-on-1_68/index.html
+score     1 doc   343: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soft-apocalypse_833/index.html
+score     1 doc   367: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/orchestra-of-exiles-the-story-of-bronislaw-huberman-the-israel-philharmonic-and-the-one-thousand-jews-he-saved-from-nazi-horrors_337/index.html
+-----------------------------------------------
+Query: felix punch or dna
+Matches (1) documents (ranked):
+score     2 doc   118: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/if-i-run-if-i-run-1_174/index.html
+-----------------------------------------------
+Query: converge
+Matches (1) documents (ranked):
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/all-the-light-we-cannot-see_660/index.html
+-----------------------------------------------
+Query: luna or spawned or questionable and illegal and jordanian
+Matches (2) documents (ranked):
+score     1 doc   256: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/stars-above-the-lunar-chronicles-45_632/index.html
+score     1 doc   162: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unbound-how-eight-technologies-made-us-human-transformed-society-and-brought-our-world-to-the-brink_950/index.html
+-----------------------------------------------
+
+#3: Test with myfuzzquery 3
+
+./myfuzzquery output/toscrape-1.index 10 0 | ./querier output/toscrape-1 output/toscrape-1.index  | tee regressiontesting/second-trial-toscrape-1
+./myfuzzquery: generating 10 queries from 2326 words
+Query: years and wax
+Matches (1) documents (ranked):
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+-----------------------------------------------
+Query: ends or aficionados recognized or classic objects
+Matches (2) documents (ranked):
+score     1 doc    19: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/sharp-objects_997/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/mystery_3/index.html
+-----------------------------------------------
+Query: recognize available or monkey
+Matches (2) documents (ranked):
+score     1 doc    13: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-black-maria_991/index.html
+score     1 doc     3: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/its-only-the-himalayas_981/index.html
+-----------------------------------------------
+Query: answers window patient or lunarian or mississippians or nine
+Matches (4) documents (ranked):
+score     4 doc    14: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-boys-in-the-boat-nine-americans-and-their-epic-quest-for-gold-at-the-1936-berlin-olympics_992/index.html
+score     3 doc    17: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-requiem-red_995/index.html
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+score     1 doc     6: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/olio_984/index.html
+-----------------------------------------------
+Query: comiques or university watson evaluating and rush or childrens
+Matches (55) documents (ranked):
+score     4 doc    63: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/childrens_11/index.html
+score     1 doc    20: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soumission_998/index.html
+score     1 doc     1: http://cs50tse.cs.dartmouth.edu/tse/toscrape/
+score     1 doc     2: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/page-2.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/crime_51/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/erotica_50/index.html
+score     1 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/cultural_49/index.html
+score     1 doc    26: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/politics_48/index.html
+score     1 doc    27: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/health_47/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/novels_46/index.html
+score     1 doc    29: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/short-stories_45/index.html
+score     1 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/suspense_44/index.html
+score     1 doc    31: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian_43/index.html
+score     1 doc    32: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical_42/index.html
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/self-help_41/index.html
+score     1 doc    34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/academic_40/index.html
+score     1 doc    35: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/spirituality_39/index.html
+score     1 doc    36: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/contemporary_38/index.html
+score     1 doc    37: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/thriller_37/index.html
+score     1 doc    38: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/biography_36/index.html
+score     1 doc    39: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/business_35/index.html
+score     1 doc    40: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian-fiction_34/index.html
+score     1 doc    41: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/food-and-drink_33/index.html
+score     1 doc    42: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/history_32/index.html
+score     1 doc    43: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/horror_31/index.html
+score     1 doc    44: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/humor_30/index.html
+score     1 doc    45: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/adult-fiction_29/index.html
+score     1 doc    46: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/parenting_28/index.html
+score     1 doc    47: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/autobiography_27/index.html
+score     1 doc    48: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/psychology_26/index.html
+score     1 doc    49: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/art_25/index.html
+score     1 doc    50: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/paranormal_24/index.html
+score     1 doc    51: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/poetry_23/index.html
+score     1 doc    52: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science_22/index.html
+score     1 doc    53: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/young-adult_21/index.html
+score     1 doc    54: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/new-adult_20/index.html
+score     1 doc    55: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fantasy_19/index.html
+score     1 doc    56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/add-a-comment_18/index.html
+score     1 doc    57: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sports-and-games_17/index.html
+score     1 doc    58: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science-fiction_16/index.html
+score     1 doc    59: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/default_15/index.html
+score     1 doc    60: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/music_14/index.html
+score     1 doc    61: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/nonfiction_13/index.html
+score     1 doc    62: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/religion_12/index.html
+score     1 doc    64: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fiction_10/index.html
+score     1 doc    65: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/womens-fiction_9/index.html
+score     1 doc    66: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/romance_8/index.html
+score     1 doc    67: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/philosophy_7/index.html
+score     1 doc    68: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/classics_6/index.html
+score     1 doc    69: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sequential-art_5/index.html
+score     1 doc    70: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical-fiction_4/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/mystery_3/index.html
+score     1 doc    72: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/travel_2/index.html
+score     1 doc    73: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books_1/index.html
+score     1 doc    74: http://cs50tse.cs.dartmouth.edu/tse/toscrape/index.html
+-----------------------------------------------
+Query: totally when diary bedfored or association
+Matches (1) documents (ranked):
+score     1 doc    15: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-coming-woman-a-novel-based-on-the-life-of-the-infamous-feminist-victoria-woodhull_993/index.html
+-----------------------------------------------
+Query: worrying
+Matches (1) documents (ranked):
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/self-help_41/index.html
+-----------------------------------------------
+Query: young member or horror
+Matches (54) documents (ranked):
+score     4 doc    43: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/horror_31/index.html
+score     1 doc     1: http://cs50tse.cs.dartmouth.edu/tse/toscrape/
+score     1 doc     2: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/page-2.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/crime_51/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/erotica_50/index.html
+score     1 doc    25: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/cultural_49/index.html
+score     1 doc    26: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/politics_48/index.html
+score     1 doc    27: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/health_47/index.html
+score     1 doc    28: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/novels_46/index.html
+score     1 doc    29: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/short-stories_45/index.html
+score     1 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/suspense_44/index.html
+score     1 doc    31: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian_43/index.html
+score     1 doc    32: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical_42/index.html
+score     1 doc    33: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/self-help_41/index.html
+score     1 doc    34: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/academic_40/index.html
+score     1 doc    35: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/spirituality_39/index.html
+score     1 doc    36: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/contemporary_38/index.html
+score     1 doc    37: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/thriller_37/index.html
+score     1 doc    38: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/biography_36/index.html
+score     1 doc    39: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/business_35/index.html
+score     1 doc    40: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/christian-fiction_34/index.html
+score     1 doc    41: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/food-and-drink_33/index.html
+score     1 doc    42: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/history_32/index.html
+score     1 doc    44: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/humor_30/index.html
+score     1 doc    45: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/adult-fiction_29/index.html
+score     1 doc    46: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/parenting_28/index.html
+score     1 doc    47: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/autobiography_27/index.html
+score     1 doc    48: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/psychology_26/index.html
+score     1 doc    49: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/art_25/index.html
+score     1 doc    50: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/paranormal_24/index.html
+score     1 doc    51: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/poetry_23/index.html
+score     1 doc    52: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science_22/index.html
+score     1 doc    53: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/young-adult_21/index.html
+score     1 doc    54: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/new-adult_20/index.html
+score     1 doc    55: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fantasy_19/index.html
+score     1 doc    56: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/add-a-comment_18/index.html
+score     1 doc    57: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sports-and-games_17/index.html
+score     1 doc    58: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/science-fiction_16/index.html
+score     1 doc    59: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/default_15/index.html
+score     1 doc    60: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/music_14/index.html
+score     1 doc    61: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/nonfiction_13/index.html
+score     1 doc    62: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/religion_12/index.html
+score     1 doc    63: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/childrens_11/index.html
+score     1 doc    64: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/fiction_10/index.html
+score     1 doc    65: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/womens-fiction_9/index.html
+score     1 doc    66: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/romance_8/index.html
+score     1 doc    67: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/philosophy_7/index.html
+score     1 doc    68: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/classics_6/index.html
+score     1 doc    69: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/sequential-art_5/index.html
+score     1 doc    70: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/historical-fiction_4/index.html
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/mystery_3/index.html
+score     1 doc    72: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/travel_2/index.html
+score     1 doc    73: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books_1/index.html
+score     1 doc    74: http://cs50tse.cs.dartmouth.edu/tse/toscrape/index.html
+-----------------------------------------------
+Query: lyrics
+Matches (1) documents (ranked):
+score     2 doc    17: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-requiem-red_995/index.html
+-----------------------------------------------
+Query: flying or knot or freed and cruising and blessed
+Matches (2) documents (ranked):
+score     1 doc     5: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mesaerion-the-best-science-fiction-stories-1800-1849_983/index.html
+score     1 doc    65: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/womens-fiction_9/index.html
+-----------------------------------------------
+
+#4: Test with myfuzzquery 4
+./myfuzzquery output/toscrape-2.index 10 0 | ./querier output/toscrape-2 output/toscrape-2.index  | tee regressiontesting/second-trial-toscrape-2
+./myfuzzquery: generating 10 queries from 12137 words
+Query: fortitude and hannibal
+Matches (0) documents (ranked):
+No documents match
+-----------------------------------------------
+Query: comedy or effectively nation or legendary hangs
+Matches (1) documents (ranked):
+score     1 doc    84: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/chasing-heaven-what-dying-taught-me-about-living_797/index.html
+-----------------------------------------------
+Query: archrival station or cbddb
+Matches (1) documents (ranked):
+score     1 doc   234: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/salt_731/index.html
+-----------------------------------------------
+Query: answers statesman raging or stoker or mississippians or threatens
+Matches (3) documents (ranked):
+score     9 doc   172: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dracula-the-un-dead_370/index.html
+score     1 doc   425: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/mr-mercedes-bill-hodges-trilogy-1_717/index.html
+score     1 doc   438: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-murder-that-never-was-forensic-instincts-5_939/index.html
+-----------------------------------------------
+Query: cue or brad complemented renderings and stayed or versification
+Matches (2) documents (ranked):
+score     2 doc   410: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/shrunken-treasures-literary-classics-short-sweet-and-silly_484/index.html
+score     1 doc   459: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-had-a-nice-time-and-other-lies-how-to-find-love-sht-like-that_814/index.html
+-----------------------------------------------
+Query: authentic church loyalties cracking or joy
+Matches (30) documents (ranked):
+score     6 doc   385: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/spark-joy-an-illustrated-master-class-on-the-art-of-organizing-and-tidying-up_927/index.html
+score     4 doc   195: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/catastrophic-happiness-finding-joy-in-childhoods-messy-years_138/index.html
+score     2 doc    14: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-four-agreements-a-practical-guide-to-personal-freedom_970/index.html
+score     2 doc    30: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/rip-it-up-and-start-again_986/index.html
+score     2 doc    81: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-new-earth-awakening-to-your-lifes-purpose_311/index.html
+score     2 doc   110: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/born-for-this-how-to-find-the-work-you-were-meant-to-do_588/index.html
+score     2 doc   387: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-gutsy-girl-escapades-for-your-life-of-epic-adventure_934/index.html
+score     1 doc    23: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/how-music-works_979/index.html
+score     1 doc   132: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/my-kitchen-year-136-recipes-that-saved-my-life_646/index.html
+score     1 doc   187: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/dress-your-family-in-corduroy-and-denim_562/index.html
+score     1 doc   188: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/hyperbole-and-a-half-unfortunate-situations-flawed-coping-mechanisms-mayhem-and-other-things-that-happened_702/index.html
+score     1 doc   189: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/i-know-what-im-doing-and-other-lies-i-tell-myself-dispatches-from-a-life-under-construction_704/index.html
+score     1 doc   190: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/old-school-diary-of-a-wimpy-kid-10_723/index.html
+score     1 doc   191: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-long-haul-diary-of-a-wimpy-kid-9_757/index.html
+score     1 doc   193: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/fifty-shades-freed-fifty-shades-3_156/index.html
+score     1 doc   194: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/parenting_28/index.html
+score     1 doc   241: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/seven-brief-lessons-on-physics_219/index.html
+score     1 doc   304: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/add-a-comment_18/page-2.html
+score     1 doc   353: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-psychopath-test-a-journey-through-the-madness-industry_857/index.html
+score     1 doc   354: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-the-secret-1_859/index.html
+score     1 doc   357: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/a-piece-of-sky-a-grain-of-rice-a-memoir-in-four-meditations_878/index.html
+score     1 doc   373: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/category/books/nonfiction_13/index.html
+score     1 doc   379: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-power-of-now-a-guide-to-spiritual-enlightenment_855/index.html
+score     1 doc   380: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/algorithms-to-live-by-the-computer-science-of-human-decisions_880/index.html
+score     1 doc   381: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/call-the-nurse-true-stories-of-a-country-nurse-on-a-scottish-isle_885/index.html
+score     1 doc   382: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/everydata-the-misinformation-hidden-in-the-little-data-you-consume-every-day_891/index.html
+score     1 doc   383: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-the-country-we-love-my-family-divided_901/index.html
+score     1 doc   384: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/reskilling-america-learning-to-labor-in-the-twenty-first-century_922/index.html
+score     1 doc   388: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-life-changing-magic-of-tidying-up-the-japanese-art-of-decluttering-and-organizing_936/index.html
+score     1 doc   420: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-secret-of-dreadwillow-carse_944/index.html
+-----------------------------------------------
+Query: committed
+Matches (5) documents (ranked):
+score     2 doc   355: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/thirteen-reasons-why_866/index.html
+score     1 doc    24: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/in-her-wake_980/index.html
+score     1 doc   277: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/the-hook-up-game-on-1_68/index.html
+score     1 doc   343: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/soft-apocalypse_833/index.html
+score     1 doc   367: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/orchestra-of-exiles-the-story-of-bronislaw-huberman-the-israel-philharmonic-and-the-one-thousand-jews-he-saved-from-nazi-horrors_337/index.html
+-----------------------------------------------
+Query: felix punch or dna
+Matches (1) documents (ranked):
+score     2 doc   118: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/if-i-run-if-i-run-1_174/index.html
+-----------------------------------------------
+Query: converge
+Matches (1) documents (ranked):
+score     1 doc    71: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/all-the-light-we-cannot-see_660/index.html
+-----------------------------------------------
+Query: luna or spawned or questionable and illegal and jordanian
+Matches (2) documents (ranked):
+score     1 doc   256: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/stars-above-the-lunar-chronicles-45_632/index.html
+score     1 doc   162: http://cs50tse.cs.dartmouth.edu/tse/toscrape/catalogue/unbound-how-eight-technologies-made-us-human-transformed-society-and-brought-our-world-to-the-brink_950/index.html
+-----------------------------------------------
+
+#compare:
+
+cmp -l regressiontesting/first-trial-toscrape-1 regressiontesting/second-trial-toscrape-1
+
+cmp -l regressiontesting/first-trial-toscrape-2 regressiontesting/second-trial-toscrape-2
