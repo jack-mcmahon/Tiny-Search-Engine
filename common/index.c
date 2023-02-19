@@ -1,5 +1,5 @@
 /* 
- * index.c
+ * index.c  
  *
  * An index is a hashtable of countersets.
  *
